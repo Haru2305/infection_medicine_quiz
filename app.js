@@ -15,7 +15,8 @@ const CATEGORIES = [
 const KEYS = ['A','B','C','D'];
 const STORAGE = 'infectlab-v1';
 const app = document.getElementById('app');
-let state = {route:'home', filters:{cat:'all',level:'all',status:'all'}, session:null,lectureId:null,lectureFilter:'all',lectureSearch:'',readerLarge:false};
+function readerPreference(){try{return localStorage.getItem('infectlab-reader-large')==='1'}catch{return false}}
+let state = {route:'home', filters:{cat:'all',level:'all',status:'all'}, session:null,lectureId:null,lectureFilter:'all',lectureSearch:'',readerLarge:readerPreference()};
 function loadStore(){try {const d=JSON.parse(localStorage.getItem(STORAGE)); return d&&typeof d==='object'?{records:d.records||{},bookmarks:d.bookmarks||{},lectures:d.lectures||{}}:{records:{},bookmarks:{},lectures:{}}}catch{return {records:{},bookmarks:{}}}}
 let store=loadStore();
 function persist(){try{localStorage.setItem(STORAGE,JSON.stringify(store))}catch{notify('端末への保存に失敗しました')}}
