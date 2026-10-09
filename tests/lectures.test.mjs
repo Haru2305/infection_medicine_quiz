@@ -43,8 +43,8 @@ function launch(){
   return {
     window,storage,
     get html(){return html},get breadcrumb(){return breadcrumb},
-    click(dataset){
-      document.listeners.get('click')({target:{closest:()=>({dataset})},preventDefault(){}});
+    click(dataset,element=null){
+      document.listeners.get('click')({target:{closest:()=>element||({dataset})},preventDefault(){}});
     }
   };
 }
@@ -310,4 +310,38 @@ test('original two bridge narratives are retained at the relevant topic instead 
   assert.match(ag.sections[0].title,/70Sリボソーム/);
   assert.ok(ag.sections[0].body.includes('30S'));
   assert.ok(ag.sections.some(s=>s.body.includes('偏性嫌気性菌')));
+});
+
+test('a learner can inspect terminology inside a quiz option without submitting the answer',()=>{
+  const app=launch(),render=app.window.InlineTerms.render;
+  const q=app.window.QUESTION_BANK.find(q=>q.options.some(o=>render(o).includes('data-action="term-toggle"')));
+  assert.ok(q,'question bank needs at least one explainable choice');
+  app.click({action:'single',id:q.id});
+  assert.match(app.html,/data-action="choice-help"/);
+  assert.doesNotMatch(app.html,/class="explain-result/);
+  const panel={hidden:true,innerHTML:''},attributes={};
+  const btn={dataset:{action:'choice-help'},nextElementSibling:panel,setAttribute(k,v){attributes[k]=v}};
+  app.click(btn.dataset,btn);
+  assert.equal(panel.hidden,false);
+  assert.equal(attributes['aria-expanded'],'true');
+  assert.doesNotMatch(app.html,/class="explain-result/,'glossary help must not count as answering');
+  app.click(btn.dataset,btn);
+  assert.equal(panel.hidden,true);
+});
+test('term and nested prerequisite buttons expand on demand without navigation',()=>{
+  const app=launch();
+  app.click({action:'lecture-open',id:'L07'});
+  const chapter=app.html;
+  const panel={hidden:true,innerHTML:'existing definition'},state={};
+  const parent={dataset:{action:'term-toggle',termId:'pbp_detail'},nextElementSibling:panel,setAttribute(k,v){state[k]=v}};
+  app.click(parent.dataset,parent);
+  assert.equal(panel.hidden,false);
+  assert.equal(state['aria-expanded'],'true');
+  assert.equal(app.html,chapter,'opening a definition must not rerender or change route');
+  const child={hidden:true,innerHTML:''},related={};
+  const button={dataset:{action:'term-related',termId:'pg',depth:'1'},nextElementSibling:child,setAttribute(k,v){related[k]=v}};
+  app.click(button.dataset,button);
+  assert.equal(child.hidden,false);
+  assert.match(child.innerHTML,/ペプチドグリカン/);
+  assert.equal(related['aria-expanded'],'true');
 });
