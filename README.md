@@ -25,6 +25,8 @@
 - `inline-terms-base.js`：旧33概念の正常・異常の説明を文中から再利用
 - `inline-terms-mechanisms.js`：薬理学・細菌壁・膜・免疫の詳しい用語
 - `inline-terms-clinical.js`：臨床の解剖・検査・ウイルス・寄生虫の用語
+- `inline-terms-pathogens.js`：カンジダ・結核菌・レジオネラ・HSV・HBV・HCVなど、病原体名が出た場所での説明
+- `inline-terms-molecular-gaps.js`：DAA・cccDNA・HBs抗原・SOFA・VRE関連など、未定義だった分子機構・検査指標の説明
 - `inline-terms.js`：本文を安全に解析し最初の該当語へ説明ボタンを挿入
 - `lectures-ui.js` / `app.js`：講義本文・問題解説への埋め込みとタップ開閉
 
