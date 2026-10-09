@@ -11,7 +11,9 @@ const scripts=[
   'questions.js','lectures.js','foundation-roots.js','foundation-bridges-a.js',
   'foundation-bridges-b.js','curriculum-init.js','antibiotic-depth-a.js',
   'antibiotic-depth-b.js','drug-antiviral.js','drug-antifungal.js',
-  'drug-antiparasitic.js','antibiotic-course.js','lectures-ui.js','app.js'
+  'drug-antiparasitic.js','antibiotic-course.js','non-drug-depth-a.js',
+  'non-drug-depth-b.js','non-drug-course.js','non-drug-gaps.js',
+  'question-concept-links.js','lectures-ui.js','app.js'
 ];
 function launch(){
   let html='',breadcrumb='';
@@ -167,4 +169,51 @@ test('script dependencies and responsive reader styles load in correct order',()
   assert.match(css,/\.reader-mobile-toc/);
   assert.match(css,/\.reader-prose p/);
   assert.match(css,/\.reader-font-mobile/);
+});
+
+test('all non-drug infection lessons now teach from first principles within their own chapters',()=>{
+  const app=launch();
+  const nonDrug=app.window.INFECT_LECTURES.filter(l=>l.deepBasicsIntegrated);
+  assert.equal(nonDrug.length,29);
+  assert.equal(Object.values(app.window.INFECT_NONDRUG_DEPTH).reduce((n,x)=>n+x.length,0),87);
+  for(const l of nonDrug){
+    assert.ok(l.sections.length>=13,l.id+' is missing in-lesson depth');
+    assert.ok(l.sections.slice(2,5).every(s=>s.body.length>=120),l.id+' is too superficial');
+    assert.ok(l.sections.slice(2,5).every(s=>s.body.includes('。')),l.id+' does not explain concepts');
+  }
+  const byId=Object.fromEntries(app.window.INFECT_LECTURES.map(l=>[l.id,l]));
+  assert.ok(byId.L02.sections.some(s=>s.body.includes('クリスタルバイオレット')&&s.body.includes('サフラニン')));
+  assert.ok(byId.L28.sections.some(s=>s.body.includes('くも膜下腔')&&s.body.includes('髄液')));
+  assert.ok(byId.L33.sections.some(s=>s.body.includes('GABA')&&s.body.includes('ボツリヌス')));
+  assert.ok(byId.L36.sections.some(s=>s.body.includes('p53')&&s.body.includes('HPV')));
+  assert.ok(byId.L23.sections.some(s=>s.body.includes('Cryptosporidium')));
+});
+
+test('all 102 existing quiz questions lead to an explanatory lesson without changing answers',()=>{
+  const app=launch(),ids=new Set(app.window.INFECT_LECTURES.map(l=>l.id));
+  assert.equal(Object.keys(app.window.INFECT_QUESTION_CONCEPT_LINKS).length,102);
+  for(const q of app.window.QUESTION_BANK){
+    const target=app.window.INFECT_QUESTION_CONCEPT_LINKS[q.id];
+    assert.ok(target&&ids.has(target.id),'missing explainer for '+q.id);
+    assert.ok(q.reasons.length===4);
+  }
+  app.click({route:'library'});
+  app.click({action:'start',mode:'random10'});
+  app.click({action:'answer',index:'0'});
+  assert.match(app.html,/WHY\? · ここから理解し直す/);
+  assert.match(app.html,/data-action="lecture-open"/);
+});
+
+test('a student can open non-drug deep biology and clinical anatomy from the home page',()=>{
+  const app=launch();
+  assert.match(app.html,/感染症のしくみをゼロから/);
+  app.click({action:'lecture-reference'});
+  assert.match(app.html,/感染症の基礎/);
+  assert.match(app.html,/臨床推論/);
+  app.click({action:'lecture-open',id:'L02'});
+  assert.match(app.html,/Gram染色は何をしている/);
+  app.click({action:'lecture-open',id:'L28'});
+  assert.match(app.html,/髄膜と髄液って何のため/);
+  app.click({action:'lecture-open',id:'L35'});
+  assert.match(app.html,/好中球減少で菌の種類が変わる理由/);
 });
