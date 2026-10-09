@@ -302,3 +302,31 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 .prereq-links{grid-template-columns:1fr;gap:8px}
 .prereq-link{min-height:70px}
 }
+
+
+/* Drug-first course index: pathogen biology is taught inside each medicine chapter. */
+.drug-course-intro{margin:9px 0 25px;padding:20px 24px;border-radius:14px;border:1px solid #beded9;background:#f0faf7}
+.drug-course-intro strong{display:block;color:#15564e;font-size:16px;line-height:1.6}
+.drug-course-intro p{font-size:13px;line-height:1.85;color:#52706d;margin:8px 0 0}
+.drug-group{margin-top:34px}
+.drug-group[hidden]{display:none!important}
+.drug-group-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin:0 0 16px;padding-bottom:15px;border-bottom:1px solid #d9e3e7}
+.drug-group-number{font-size:10px;font-weight:850;letter-spacing:.15em;color:#318f86}
+.drug-group-heading h2{font-size:clamp(20px,2.5vw,27px);margin:6px 0;letter-spacing:-.025em;line-height:1.5;color:#163c48}
+.drug-group-heading p{margin:0;color:#617982;line-height:1.65;font-size:12px}
+.drug-group-count{white-space:nowrap;font-size:12px;color:#66888a;font-weight:750}
+.drug-reference-notice{padding:16px 20px;border-radius:11px;border:1px solid #d8e4e8;background:#f6f9fc;color:#27546c;margin-top:18px}
+.drug-reference-notice strong{font-size:14px}
+.drug-reference-notice p{margin:5px 0 0;font-size:12px;line-height:1.8}
+.drug-course-library .reader-category-tabs{padding:9px 0 8px;overflow-x:auto;scrollbar-width:thin;display:flex;gap:8px}
+.drug-course-library .reader-category-tabs button{flex:none;white-space:nowrap}
+.drug-course-library .reader-course-tile{transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
+.drug-course-library .reader-course-tile:hover{transform:translateY(-2px)}
+@media(max-width:750px){
+.drug-course-intro{padding:17px 16px;margin:8px 0 19px}
+.drug-course-intro strong{font-size:14px}
+.drug-group{margin-top:28px}
+.drug-group-heading{align-items:start}
+.drug-group-heading p{font-size:11px}
+.drug-group-count{font-size:11px}
+}
