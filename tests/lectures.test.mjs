@@ -14,7 +14,7 @@ const scripts=[
   'drug-antiparasitic.js','antibiotic-course.js','non-drug-depth-a.js',
   'non-drug-depth-b.js','non-drug-course.js','non-drug-gaps.js',
   'question-concept-links.js','first-principles-concepts.js',
-  'in-lesson-concepts.js','inline-depth-placement.js','inline-terms-base.js',
+  'in-lesson-concepts.js','inline-depth-placement.js','semantic-paragraphs.js','inline-terms-base.js',
   'inline-terms-mechanisms.js','inline-terms-clinical.js','inline-terms-clarify.js','inline-terms-pathogens.js','inline-terms-molecular-gaps.js','inline-terms.js',
   'lectures-ui.js','app.js'
 ];
@@ -424,4 +424,46 @@ test('lecture paragraphs render without arbitrary lead text or mid-sentence divi
   assert.ok(!html.includes('class="reader-lead"'));
   assert.ok(!html.includes('<p>先行文。</p>'));
   assert.match(html,/reader-section-end/);
+});
+
+test('meaning-based paragraph breaks only occur at selected sections without changing words',()=>{
+  const context=vm.createContext({window:{}});
+  const stop=scripts.indexOf('semantic-paragraphs.js');
+  assert.ok(stop>0);
+  for(const file of scripts.slice(0,stop))vm.runInContext(read(file),context,{filename:file});
+  const chapters=context.window.INFECT_LECTURES;
+  assert.equal(chapters.length,71);
+  const original=new Map(chapters.map(l=>[l.id,l.sections.map(s=>s.body)]));
+  vm.runInContext(read('semantic-paragraphs.js'),context,{filename:'semantic-paragraphs.js'});
+  const modified=context.window.INFECT_LECTURES;
+  assert.equal(context.window.INFECT_SEMANTIC_PARAGRAPH_EDITS.sections,43);
+  assert.equal(context.window.INFECT_SEMANTIC_PARAGRAPH_EDITS.breaks,64);
+  assert.equal(modified.length,71);
+  let changed=0,addedBreaks=0;
+  for(const l of modified)for(const [i,s] of l.sections.entries()){
+    const old=original.get(l.id)[i];
+    const removeWhitespace=value=>value.replace(/\s/g,'');
+    assert.equal(removeWhitespace(s.body),removeWhitespace(old),l.id+':'+i+': changed original prose');
+    if(s.body!==old){
+      changed++;
+      addedBreaks+=(s.body.match(/\n\s*\n/g)||[]).length-(old.match(/\n\s*\n/g)||[]).length;
+      assert.match(s.body,/[。！？]\n\n/,'new breaks must follow a complete medical statement');
+    }
+  }
+  assert.equal(changed,43);
+  assert.equal(addedBreaks,64);
+  const penicillins=modified.find(l=>l.id==='L04').sections[8].body;
+  assert.match(penicillins,/経口薬として使われる。\n\nアンピシリンは/);
+  assert.match(penicillins,/文脈で頻出。\n\nピペラシリン/);
+  assert.equal(modified.find(l=>l.id==='RXV01').sections[0].body,original.get('RXV01')[0],'existing natural paragraphs stay unchanged');
+});
+test('lecture HTML uses curated paragraphs while preserving inline term definitions',()=>{
+  const app=launch(),lessons=app.window.INFECT_LECTURES;
+  const l=lessons.find(x=>x.id==='L05');
+  assert.match(l.sections[7].body,/第3世代：/);
+  const html=app.window.LectureUI.detail({lectures:lessons,categories:[],completed:{},id:l.id});
+  const section=html.slice(html.indexOf('id="lesson-section-7"'),html.indexOf('id="lesson-section-8"'));
+  assert.ok((section.match(/<p>/g)||[]).length>=3,'drug-generation comparisons need readable paragraphs');
+  assert.ok(html.includes('data-action="term-toggle"'),'in-paragraph definitions must remain available');
+  assert.equal(app.window.QUESTION_BANK.length,102);
 });
