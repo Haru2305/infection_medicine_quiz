@@ -1,4 +1,4 @@
-/* INFECT LAB: antibiotic drug classes are the top-level curriculum.
+/* INFECT LAB: anti-infective medicines are the top-level curriculum.
    Microbiology, virology, mycology, parasitology and molecular foundations remain
    in the optional reference library, never the primary chapter index. */
 (() => {
@@ -12,13 +12,13 @@
    if(!l)throw Error("Missing antibiotic chapter: "+id);
    const bridge = l.sections.slice(0,2);
    const original = l.sections.slice(2);
-   return {...l, curriculumTrack:"antibiotics", sequence:i+1,
+   return {...l, curriculumTrack:"drugs", drugGroup:"antibacterial", sequence:i+1,
      sections:[...bridge,...(extras[id]||[]),...original],
      prereqs:[] };
  });
  const tb = byId.get("L16");
  const tbLesson = {
-   id:"ABTB",category:"antibiotics",curriculumTrack:"antibiotics",sequence:order.length+1,
+   id:"ABTB",category:"antibiotics",curriculumTrack:"drugs",drugGroup:"antibacterial",sequence:order.length+1,
    title:"抗結核薬を機序から理解",subtitle:"イソニアジド・リファンピシン・エタンブトール・ピラジナミドを基礎から",
    questionIds: tb?.questionIds || [],
    sections:[
@@ -32,10 +32,20 @@
     ...(tb?.sections || []).filter((s,i)=>!s.title.startsWith("ゼロから")&&!s.title.startsWith("なぜ？")).map(s=>({...s,title:"補足｜"+s.title}))
    ]
  };
- const primary = [...order,tbLesson];
+ const additional = (window.INFECT_OTHER_DRUG_MODULES || []).map((l,i)=>({...l,curriculumTrack:"drugs",sequence:order.length+2+i,prereqs:[]}));
+ const primary = [...order,tbLesson,...additional];
  const mainIDs = new Set(primary.map(x=>x.id));
+ if(mainIDs.size !== primary.length)throw Error("Duplicate medication lecture ID");
  const references = all.filter(x=>!mainIDs.has(x.id)).map(x=>({...x,curriculumTrack:"reference"}));
  window.INFECT_LECTURES = [...primary,...references];
- window.INFECT_ANTIBIOTIC_MAIN_IDS = primary.map(x=>x.id);
+ window.INFECT_MEDICINE_MAIN_IDS = primary.map(x=>x.id);
+ window.INFECT_ANTIBIOTIC_MAIN_IDS = order.map(x=>x.id).concat(tbLesson.id);
  window.INFECT_SUPPORT_LESSONS = references;
+ window.INFECT_DRUG_GROUPS = [
+ {id:"antibacterial",name:"抗細菌薬",desc:"βラクタム、リボソーム阻害、抗MRSA薬、抗結核薬"},
+ {id:"antiviral",name:"抗ウイルス薬",desc:"ヘルペス、インフルエンザ、HIV、肝炎、COVID-19"},
+ {id:"antifungal",name:"抗真菌薬",desc:"アゾール、エキノキャンディン、ポリエン"},
+ {id:"antiprotozoal",name:"抗原虫薬",desc:"マラリア、アメーバ・ジアルジア、トキソプラズマ"},
+ {id:"antihelminthic",name:"駆虫薬",desc:"ベンズイミダゾール、イベルメクチン、プラジカンテル"}
+ ];
 })();
