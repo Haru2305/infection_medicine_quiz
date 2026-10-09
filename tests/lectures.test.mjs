@@ -163,7 +163,7 @@ test('all displayed lesson metadata is escaped and paragraphs render safely',()=
 
 test('script dependencies and responsive reader styles load in correct order',()=>{
   const index=read('index.html'),css=read('reading-theme.css');
-  const offsets=scripts.map(name=>index.indexOf('src="'+name+'"'));
+  const offsets=scripts.map(name=>index.indexOf('src="'+name));
   assert.ok(offsets.every(x=>x!==-1));
   assert.ok(offsets.every((x,i)=>i===0||x>offsets[i-1]));
   assert.match(index,/reading-theme.css/);
@@ -335,11 +335,21 @@ test('term and nested prerequisite buttons expand on demand without navigation',
   const app=launch();
   app.click({action:'lecture-open',id:'L07'});
   const chapter=app.html;
-  const panel={hidden:true,innerHTML:'existing definition'},state={};
-  const parent={dataset:{action:'term-toggle',termId:'pbp_detail'},nextElementSibling:panel,setAttribute(k,v){state[k]=v}};
+  const moves=[],paragraph={parentElement:{},insertAdjacentElement(position,node){moves.push({position,node})}};
+  const panel={hidden:true,innerHTML:'existing definition',classList:{contains(name){return name==='inline-term-content'}}},state={};
+  const parent={dataset:{action:'term-toggle',termId:'pbp_detail'},nextElementSibling:panel,
+    closest(){return paragraph},setAttribute(k,v){state[k]=v}};
   app.click(parent.dataset,parent);
   assert.equal(panel.hidden,false);
   assert.equal(state['aria-expanded'],'true');
+  assert.equal(moves.length,1);
+  assert.equal(moves[0].position,'afterend');
+  assert.equal(moves[0].node,panel,'open term card after paragraph, not inside its sentence');
+  app.click(parent.dataset,parent);
+  assert.equal(panel.hidden,true);
+  app.click(parent.dataset,parent);
+  assert.equal(panel.hidden,false);
+  assert.equal(moves.length,1,'reopening does not move the card again');
   assert.equal(app.html,chapter,'opening a definition must not rerender or change route');
   const child={hidden:true,innerHTML:''},related={};
   const button={dataset:{action:'term-related',termId:'pg',depth:'1'},nextElementSibling:child,setAttribute(k,v){related[k]=v}};

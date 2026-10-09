@@ -67,6 +67,7 @@ function render(){const pages={home:'ダッシュボード',library:'問題ラ�
 let timer;function notify(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(timer);timer=setTimeout(()=>t.classList.remove('show'),2800)}
 function exportStore(){const data=JSON.stringify({version:1,exportedAt:new Date().toISOString(),records:store.records,bookmarks:store.bookmarks,lectures:store.lectures||{}},null,2);const blob=new Blob([data],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='infect-lab-progress.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 function importStore(file){if(!file)return;const r=new FileReader();r.onload=()=>{try{const data=JSON.parse(r.result);if(data.version!==1||typeof data.records!=='object'||!data.records||typeof data.bookmarks!=='object'||!data.bookmarks)throw Error('形式');const ids=new Set(BANK.map(q=>q.id));const records={},bookmarks={};for(const [id,rec] of Object.entries(data.records)){if(!ids.has(id)||!rec||typeof rec!=='object')continue;const seen=Math.max(0,Number(rec.seen)||0),correct=Math.max(0,Number(rec.correct)||0),wrong=Math.max(0,Number(rec.wrong)||0);if(!Number.isFinite(seen+correct+wrong))continue;records[id]={seen:Math.min(seen,1000000),correct:Math.min(correct,seen),wrong:Math.min(wrong,seen),lastCorrect:rec.lastCorrect===true,lastAt:Number(rec.lastAt)||0}}for(const [id,value] of Object.entries(data.bookmarks)){if(ids.has(id)&&value===true)bookmarks[id]=true}if(!confirm('現在の学習記録を読み込んだ記録で上書きします。続けますか？'))return;store={records,bookmarks,lectures:Object.fromEntries(Object.entries(data.lectures||{}).filter(([id,v])=>LECTURES.some(l=>l.id===id)&&v===true))};persist();render();notify('学習記録を読み込みました')}catch{notify('読み込めないJSONファイルです')}};r.readAsText(file)}
+const termPanelByTrigger=new WeakMap();
 document.addEventListener('click',e=>{const btn=e.target.closest('[data-route],[data-action]');if(!btn)return;const route=btn.dataset.route,action=btn.dataset.action;if(action==='choice-help'){
  e.preventDefault();
  const expansion=btn.nextElementSibling;
@@ -77,8 +78,19 @@ document.addEventListener('click',e=>{const btn=e.target.closest('[data-route],[
 }
 if(action==='term-toggle'){
  e.preventDefault();
- const expansion=btn.nextElementSibling;
- if(!expansion)return;
+ // The glossary card must not remain a block inside an inline sentence.
+ // The first tap moves it after the entire containing paragraph/choice block,
+ // preserving the actual prose and natural browser line wrapping.
+ let expansion=termPanelByTrigger.get(btn);
+ if(!expansion){
+   expansion=btn.nextElementSibling;
+   if(!expansion||!expansion.classList.contains('inline-term-content'))return;
+   const anchor=btn.closest('p, h2, li, .reason, .memory-box, .choice-help-content');
+   if(anchor&&anchor.parentElement){
+     anchor.insertAdjacentElement('afterend',expansion);
+   }
+   termPanelByTrigger.set(btn,expansion);
+ }
  expansion.hidden=!expansion.hidden;
  btn.setAttribute('aria-expanded',String(!expansion.hidden));
  return;

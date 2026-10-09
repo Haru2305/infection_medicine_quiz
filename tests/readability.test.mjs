@@ -42,7 +42,7 @@ function fixture(saved={}){
 }
 test('theme and font sizes are accessible across desktop/tablet/mobile',()=>{
  const html=source('index.html'),css=source('reading-theme.css');
- assert.ok(html.indexOf('href="reading-theme.css"')>html.indexOf('href="styles.css"'));
+ assert.ok(html.indexOf('href="reading-theme.css')>html.indexOf('href="styles.css"'));
  assert.match(css,/@media\(max-width:750px\)/);
  assert.match(css,/@media\(min-width:751px\) and \(max-width:1000px\)/);
  assert.match(css,/\.reader-prose p\{[^}]*font-size:16px/);

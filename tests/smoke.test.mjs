@@ -127,7 +127,7 @@ test('page boot + lecture navigation + reading record + targeted quiz works', ()
 
 test('HTML and CSS connect all course assets and mobile navigation', () => {
   const html = read('index.html'), css = read('styles.css');
-  for (const file of scripts) assert.ok(html.includes('src="' + file + '"'), 'script not linked ' + file);
+  for (const file of scripts) assert.ok(html.includes('src="' + file), 'script not linked ' + file);
   assert.match(html, /data-route="lectures"/);
   assert.match(css, /course-layout/);
   assert.match(css, /mobile-nav/);

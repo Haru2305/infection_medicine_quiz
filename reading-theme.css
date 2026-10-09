@@ -386,7 +386,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 .inline-term-trigger[aria-expanded="true"]{color:#11685f;border-bottom-style:solid}
 .inline-term-question{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border:1px solid #adbdc1;border-radius:50%;font:800 10px/1 system-ui,sans-serif;color:#58767c;margin-left:3px;vertical-align:2px;background:#fff}
 .inline-term-content[hidden],.inline-term-related-content[hidden]{display:none!important}
-.inline-term-content{display:block;clear:both;margin:11px 0 15px;padding:2px 0 2px 16px;border-left:2px solid #9dbfc0;max-width:100%;font-size:14px;font-weight:400;line-height:1.9;color:#33474e;letter-spacing:normal;text-align:left}
+.inline-term-content{display:block;clear:none;margin:11px 0 15px;padding:2px 0 2px 16px;border-left:2px solid #9dbfc0;max-width:100%;font-size:14px;font-weight:400;line-height:1.9;color:#33474e;letter-spacing:normal;text-align:left}
 .inline-term-card,.inline-term-step,.inline-term-next,.inline-term-related-item,.inline-term-related-content{display:block}
 .inline-term-card-title{display:block;font-size:15px;font-weight:800;line-height:1.6;margin:0 0 9px;color:#244e51}
 .inline-term-step{padding:8px 0;border-bottom:1px solid #e3e9e9}
@@ -433,3 +433,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
   line-break: strict;
 }
 .reader-prose p:last-child { margin-bottom: 0; }
+
+/* Glossary cards are placed after their text block. Keep Japanese text lines intact. */
+.reader-prose > .inline-term-content{margin-top:-7px;margin-bottom:24px}
+.quiz-card > .inline-term-content,.explain > .inline-term-content,.reason-list > .inline-term-content{margin-top:5px;margin-bottom:15px}
