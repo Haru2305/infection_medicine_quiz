@@ -163,7 +163,7 @@ test('all displayed lesson metadata is escaped and paragraphs render safely',()=
 
 test('script dependencies and responsive reader styles load in correct order',()=>{
   const index=read('index.html'),css=read('reading-theme.css');
-  const offsets=scripts.map(name=>index.indexOf('src="'+name+'"'));
+  const offsets=scripts.map(name=>index.indexOf('src="'+name));
   assert.ok(offsets.every(x=>x!==-1));
   assert.ok(offsets.every((x,i)=>i===0||x>offsets[i-1]));
   assert.match(index,/reading-theme.css/);
