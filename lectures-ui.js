@@ -95,6 +95,7 @@
       + '<section class="reader-finish" id="lecture-finish"><div class="reader-finish-symbol">✓</div><span>LECTURE COMPLETE</span>'
       + '<h2>ここまで読んだら、問題で確認。</h2><p>覚えるだけでなく、仕組みを自分の言葉で説明できるかがポイント。読了記録はいつでも取り消せます。</p>'
       + '<div class="reader-finish-actions"><button class="btn btn-primary" data-action="lecture-mark" data-id="'+html(l.id)+'">'+(done?'✓ 読了済みを解除':'✓ この講義を読了にする')+'</button>'
+      + '<button class="btn btn-primary" data-action="lecture-quiz" data-id="'+html(l.id)+'">この講義の確認テスト（'+(l.questionIds||[]).length+'問） →</button>'
       + '<button class="btn btn-ghost" data-action="category" data-cat="'+html(l.category)+'">この分野の4択問題へ →</button></div></section>'
       + '<div class="reader-neighbors"><div>'+(prev?'<button class="reader-neighbor" data-action="lecture-open" data-id="'+html(prev.id)+'"><span>← 前の講義</span><strong>'+html(prev.title)+'</strong></button>':'')+'</div>'
       + '<div>'+(next?'<button class="reader-neighbor" data-action="lecture-open" data-id="'+html(next.id)+'"><span>次の講義 →</span><strong>'+html(next.title)+'</strong></button>':'')+'</div></div>'
