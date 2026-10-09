@@ -15,7 +15,7 @@ const scripts=[
   'non-drug-depth-b.js','non-drug-course.js','non-drug-gaps.js',
   'question-concept-links.js','first-principles-concepts.js',
   'in-lesson-concepts.js','inline-depth-placement.js','inline-terms-base.js',
-  'inline-terms-mechanisms.js','inline-terms-clinical.js','inline-terms-clarify.js','inline-terms.js',
+  'inline-terms-mechanisms.js','inline-terms-clinical.js','inline-terms-clarify.js','inline-terms-pathogens.js','inline-terms-molecular-gaps.js','inline-terms.js',
   'lectures-ui.js','app.js'
 ];
 function launch(){
@@ -344,4 +344,41 @@ test('term and nested prerequisite buttons expand on demand without navigation',
   assert.equal(child.hidden,false);
   assert.match(child.innerHTML,/ペプチドグリカン/);
   assert.equal(related['aria-expanded'],'true');
+});
+
+test('named infection agents and formerly missing mechanisms are explained inline, not as a separate chapter',()=>{
+  const app=launch(),glossary=app.window.InlineTerms;
+  assert.equal(glossary.list().length,159);
+  const tests=[
+    ['VRE','vr_enterococci'],['D-Ala-D-Ala','dala'],['C. difficile','clostridioides'],
+    ['肺炎球菌','pneumo'],['レジオネラ','legionella'],['HSV','hsv'],
+    ['HCV','hcv'],['HBs抗原','hepatitis_serology'],['cccDNA','cccDNA'],
+    ['DAA','daa'],['NS5A','ns5a'],['qSOFA','sofa'],
+    ['HUS','hus'],['IRIS','iris'],['好酸球','eosinophils']
+  ];
+  for(const [word,id] of tests){
+    const rendered=glossary.render('ここに'+word+'が現れる。');
+    assert.match(rendered,new RegExp('data-term-id="'+id+'"'),word+' missing');
+    const entry=glossary.get(id);
+    assert.ok(entry&&entry.what.length>=25&&entry.normal.length>=25&&entry.why.length>=25,id+' incomplete');
+  }
+  for(const id of ['L02','L20','L29','L32','L35']){
+    const rendered=app.window.LectureUI.detail({lectures:app.window.INFECT_LECTURES,categories:[],completed:{},id});
+    assert.match(rendered,/data-action="term-toggle"/);
+    assert.doesNotMatch(rendered,/STEP 0 \/ FIRST PRINCIPLES/);
+  }
+  assert.equal(app.window.INFECT_LECTURES.length,71);
+  assert.equal(app.window.QUESTION_BANK.length,102);
+});
+
+test('new glossary definitions escape HTML safely and do not create clickable nested answer buttons',()=>{
+  const app=launch(),g=app.window.InlineTerms;
+  const text=g.render('<script>danger</script> VRE NS5A HCV');
+  assert.ok(!text.includes('<script>'));
+  assert.match(text,/&lt;script&gt;/);
+  assert.match(text,/data-action="term-toggle"/);
+  app.click({route:'library'});
+  app.click({action:'start',mode:'random10'});
+  assert.match(app.html,/class="option/);
+  assert.match(app.html,/class="choice-row"/);
 });
