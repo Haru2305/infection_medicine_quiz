@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 const read = file => fs.readFileSync(new URL('../' + file, import.meta.url), 'utf8');
-const scripts = ['questions.js','lectures.js','foundation-roots.js','foundation-bridges-a.js','foundation-bridges-b.js','curriculum-init.js','antibiotic-depth-a.js','antibiotic-depth-b.js','drug-antiviral.js','drug-antifungal.js','drug-antiparasitic.js','antibiotic-course.js','non-drug-depth-a.js','non-drug-depth-b.js','non-drug-course.js','non-drug-gaps.js','question-concept-links.js','first-principles-concepts.js','in-lesson-concepts.js','inline-depth-placement.js','inline-terms-base.js','inline-terms-mechanisms.js','inline-terms-clinical.js','inline-terms-clarify.js','inline-terms-pathogens.js','inline-terms-molecular-gaps.js','inline-terms.js','lectures-ui.js','app.js'];
+const scripts = ['questions.js','lectures.js','foundation-roots.js','foundation-bridges-a.js','foundation-bridges-b.js','curriculum-init.js','antibiotic-depth-a.js','antibiotic-depth-b.js','drug-antiviral.js','drug-antifungal.js','drug-antiparasitic.js','antibiotic-course.js','non-drug-depth-a.js','non-drug-depth-b.js','non-drug-course.js','non-drug-gaps.js','question-concept-links.js','first-principles-concepts.js','in-lesson-concepts.js','inline-depth-placement.js','semantic-paragraphs.js','inline-terms-base.js','inline-terms-mechanisms.js','inline-terms-clinical.js','inline-terms-clarify.js','inline-terms-pathogens.js','inline-terms-molecular-gaps.js','inline-terms.js','lectures-ui.js','app.js'];
 const windowData = {};
 vm.runInNewContext(read('questions.js'), { window: windowData }, { filename: 'questions.js' });
 vm.runInNewContext(read('lectures.js'), { window: windowData }, { filename: 'lectures.js' });
