@@ -482,7 +482,7 @@ test('authored ChatGPT-like medical explanations cover real paragraphs, not auto
    assert.ok(s.body.includes('。'),s.title+' is not prose');
    assert.ok(!s.body.includes('<script'),s.title+' embeds markup');
  }
- assert.match(ls.find(l=>l.id==='L07').sections.find(s=>s.title==='③ なぜ嫌気性菌に効かない？').body,/標的へ届/);
+ assert.match(ls.find(l=>l.id==='L07').sections.find(s=>s.title==='③ なぜ嫌気性菌に効かない？').body,/30Sまで入りづらい/);
  assert.match(ls.find(l=>l.id==='L28').sections.find(s=>s.title==='髄膜炎：髄液腔での炎症').body,/正常髄液/);
  assert.match(ls.find(l=>l.id==='L17').sections.find(s=>s.title==='細菌との根本的相違').body,/リボソーム/);
  assert.match(ls.find(l=>l.id==='L21').sections.find(s=>s.title==='真菌細胞の構造').body,/ヒト/);
