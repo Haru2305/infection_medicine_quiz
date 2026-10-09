@@ -181,8 +181,8 @@ test('all non-drug infection lessons now teach from first principles within thei
   assert.equal(Object.values(app.window.INFECT_NONDRUG_DEPTH).reduce((n,x)=>n+x.length,0),87);
   for(const l of nonDrug){
     assert.ok(l.sections.length>=11,l.id+' is missing in-lesson depth');
-    assert.ok(l.sections.slice(2,5).every(s=>s.body.length>=120),l.id+' is too superficial');
-    assert.ok(l.sections.slice(2,5).every(s=>s.body.includes('。')),l.id+' does not explain concepts');
+    assert.ok(l.sections.filter(s=>s.body.length>=120).length>=3,l.id+' lacks 3 substantial mechanism explanations');
+    assert.ok(l.sections.every(s=>s.body.includes('。')),l.id+' does not explain concepts');
   }
   const byId=Object.fromEntries(app.window.INFECT_LECTURES.map(l=>[l.id,l]));
   assert.ok(byId.L02.sections.some(s=>s.body.includes('クリスタルバイオレット')&&s.body.includes('サフラニン')));
