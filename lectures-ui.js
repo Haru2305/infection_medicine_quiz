@@ -84,7 +84,7 @@
       + '<header class="reader-hero"><div class="reader-hero-eyebrow">'+html(catName(l.category,categories))+' <span>／</span> '+html(l.id)+'</div>'
       + '<h1>'+html(l.title)+'</h1><p>'+html(l.subtitle)+'</p>'
       + '<div class="reader-hero-meta"><span>◷ 約'+minutes(l)+'分</span><span>▤ '+l.sections.length+'セクション</span>'
-      + (done?'<span class="reader-hero-done">✓ 読了済み</span>':'<span>基礎から順番に学ぶ</span>')+'</div></header>'
+      + (done?'<span class="reader-hero-done">✓ 読了済み</span>':'<span>基礎から順番に学ぶ</span>')+'<button class="reader-font-mobile" data-action="reader-font" aria-pressed="'+largeText+'" aria-label="文字を大きくする">'+(largeText?'標準に戻す':'A+ 文字拡大')+'</button></div></header>'
       + '<details class="reader-mobile-toc"><summary>章の目次を開く <span>'+l.sections.length+' セクション</span></summary><nav aria-label="この講義の章一覧">'+items+'</nav></details>'
       + '<div class="reader-layout"><aside class="reader-sidebar"><div class="reader-sidebar-card">'
       + '<div class="reader-side-label">ON THIS PAGE</div><div class="reader-sidebar-heading">この講義の目次</div><nav class="reader-toc" aria-label="この講義の章一覧">'+items+'</nav>'
