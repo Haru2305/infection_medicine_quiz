@@ -375,3 +375,50 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
   .primitive-step p{font-size:14px;line-height:1.95}
 }
 @media(prefers-reduced-motion:reduce){.primitive-toggle{transition:none}}
+
+
+/* Explain exactly where the unfamiliar word first appears.
+   Neutral dotted underline; details stay under the sentence instead of at chapter start. */
+.inline-term{display:inline}
+.inline-term-trigger{display:inline;vertical-align:baseline;font:inherit;font-weight:inherit;line-height:inherit;letter-spacing:inherit;padding:0 1px;margin:0;color:inherit;background:transparent;border:0;border-bottom:1px dotted #768c91;cursor:pointer;border-radius:0;white-space:normal;text-align:inherit}
+.inline-term-trigger:hover{color:#166e68;border-bottom-color:#166e68}
+.inline-term-trigger:focus-visible,.inline-term-related-button:focus-visible{outline:2px solid #1a8179;outline-offset:3px;border-radius:4px}
+.inline-term-trigger[aria-expanded="true"]{color:#11685f;border-bottom-style:solid}
+.inline-term-question{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border:1px solid #adbdc1;border-radius:50%;font:800 10px/1 system-ui,sans-serif;color:#58767c;margin-left:3px;vertical-align:2px;background:#fff}
+.inline-term-content[hidden],.inline-term-related-content[hidden]{display:none!important}
+.inline-term-content{display:block;clear:both;margin:11px 0 15px;padding:2px 0 2px 16px;border-left:2px solid #9dbfc0;max-width:100%;font-size:14px;font-weight:400;line-height:1.9;color:#33474e;letter-spacing:normal;text-align:left}
+.inline-term-card,.inline-term-step,.inline-term-next,.inline-term-related-item,.inline-term-related-content{display:block}
+.inline-term-card-title{display:block;font-size:15px;font-weight:800;line-height:1.6;margin:0 0 9px;color:#244e51}
+.inline-term-step{padding:8px 0;border-bottom:1px solid #e3e9e9}
+.inline-term-step strong{display:block;color:#436a6d;font-size:12px;font-weight:800;line-height:1.5}
+.inline-term-step>span{display:block;font-size:14px;line-height:1.9;padding-top:3px;font-weight:400}
+.inline-term-next{padding-top:10px}
+.inline-term-next>strong{display:block;font-size:12px;margin-bottom:9px}
+.inline-term-related-item{margin:6px 0}
+.inline-term-related-button{border:1px solid #cfdcdc;border-radius:8px;color:#33585c;background:transparent;padding:7px 11px;font-size:12px;font-family:inherit;font-weight:700;line-height:1.6;cursor:pointer;text-align:left}
+.inline-term-related-button:hover{background:#f0f6f5;border-color:#a8c6c2}
+.inline-term-related-button[aria-expanded="true"]{background:#eef6f5}
+.inline-term-related-content{padding:10px 0 10px 13px;margin-top:7px;border-left:2px solid #d9e7e5}
+.reader-prose .inline-term-content p{margin:0}
+.explain .inline-term-content{font-size:13px}
+.reader-lead .inline-term-content{font-size:14px}
+@media(max-width:750px){.inline-term-question{width:17px;height:17px;font-size:11px;vertical-align:1px}.inline-term-content{margin:9px 0 14px;padding-left:11px}.inline-term-step>span{font-size:14px;line-height:1.85}}
+@media(prefers-reduced-motion:reduce){.inline-term-trigger,.inline-term-related-button{transition:none}}
+
+
+/* Definitions adjacent to quiz answer options remain independent from answer selection. */
+.choice-row{display:block;min-width:0}
+.choice-row>.option{width:100%}
+.choice-help{display:block;margin:5px 0 4px 12px}
+.choice-help-toggle{display:inline-flex;align-items:center;gap:5px;background:transparent;border:0;border-bottom:1px dotted #73939b;color:#9db7c0;font:inherit;font-size:11px;line-height:1.6;padding:2px 4px;cursor:pointer}
+.choice-help-toggle:hover,.choice-help-toggle:focus-visible{color:#daebef}
+.choice-help-toggle:focus-visible{outline:2px solid #83bdb9;outline-offset:3px}
+.choice-help-content[hidden]{display:none!important}
+.choice-help-content{display:block;padding:10px 12px;margin:7px 0;border-left:2px solid #91b5b7;background:#1d3043;color:#e4eeee;border-radius:0 8px 8px 0;font-size:13px;line-height:1.9}
+.choice-help-content .inline-term-content{color:#e7f0f0;border-color:#6f9c9c}
+.choice-help-content .inline-term-step{border-color:#345565}
+.choice-help-content .inline-term-step>span{color:#d9e8e8}
+.choice-help-content .inline-term-step strong,.choice-help-content .inline-term-card-title{color:#d1e6e4}
+.choice-help-content .inline-term-related-button{color:#e5eeee;border-color:#5c8186}
+.choice-help-content .inline-term-related-button:hover{background:#244454}
+@media(max-width:750px){.choice-help{margin-left:7px}.choice-help-toggle{font-size:12px;min-height:28px}}

@@ -14,7 +14,9 @@ const scripts=[
   'drug-antiparasitic.js','antibiotic-course.js','non-drug-depth-a.js',
   'non-drug-depth-b.js','non-drug-course.js','non-drug-gaps.js',
   'question-concept-links.js','first-principles-concepts.js',
-  'in-lesson-concepts.js','lectures-ui.js','app.js'
+  'in-lesson-concepts.js','inline-depth-placement.js','inline-terms-base.js',
+  'inline-terms-mechanisms.js','inline-terms-clinical.js','inline-terms-clarify.js','inline-terms.js',
+  'lectures-ui.js','app.js'
 ];
 function launch(){
   let html='',breadcrumb='';
@@ -41,8 +43,8 @@ function launch(){
   return {
     window,storage,
     get html(){return html},get breadcrumb(){return breadcrumb},
-    click(dataset){
-      document.listeners.get('click')({target:{closest:()=>({dataset})},preventDefault(){}});
+    click(dataset,element=null){
+      document.listeners.get('click')({target:{closest:()=>element||({dataset})},preventDefault(){}});
     }
   };
 }
@@ -178,9 +180,9 @@ test('all non-drug infection lessons now teach from first principles within thei
   assert.equal(nonDrug.length,29);
   assert.equal(Object.values(app.window.INFECT_NONDRUG_DEPTH).reduce((n,x)=>n+x.length,0),87);
   for(const l of nonDrug){
-    assert.ok(l.sections.length>=13,l.id+' is missing in-lesson depth');
-    assert.ok(l.sections.slice(2,5).every(s=>s.body.length>=120),l.id+' is too superficial');
-    assert.ok(l.sections.slice(2,5).every(s=>s.body.includes('。')),l.id+' does not explain concepts');
+    assert.ok(l.sections.length>=11,l.id+' is missing in-lesson depth');
+    assert.ok(l.sections.filter(s=>s.body.length>=120).length>=3,l.id+' lacks 3 substantial mechanism explanations');
+    assert.ok(l.sections.every(s=>s.body.includes('。')),l.id+' does not explain concepts');
   }
   const byId=Object.fromEntries(app.window.INFECT_LECTURES.map(l=>[l.id,l]));
   assert.ok(byId.L02.sections.some(s=>s.body.includes('クリスタルバイオレット')&&s.body.includes('サフラニン')));
@@ -219,44 +221,127 @@ test('a student can open non-drug deep biology and clinical anatomy from the hom
   assert.match(app.html,/好中球減少で菌の種類が変わる理由/);
 });
 
-test('STEP 0 provides true first-principles explanations inside every medication and non-medication lesson',()=>{
+test('full course shows help where an unknown word appears, not an upfront STEP 0 block',()=>{
   const app=launch(),chapters=app.window.INFECT_LECTURES;
-  const concepts=app.window.INFECT_PRIMITIVE_CONCEPTS;
+  const glossary=app.window.InlineTerms;
   assert.equal(chapters.length,71);
-  assert.equal(concepts.length,33);
-  assert.equal(new Set(concepts.map(c=>c.id)).size,33);
-  const ids=new Set(concepts.map(c=>c.id));
-  for(const c of concepts){
-    for(const key of ['zero','normal','abnormal'])assert.ok(c[key].length>70,c.id+':'+key);
-    assert.ok(c.qb.length>=35,c.id+':qb');
+  assert.equal(app.window.INFECT_PRIMITIVE_CONCEPTS.length,33);
+  assert.equal(glossary.list().length,107);
+  for(const lesson of chapters){
+    const html=app.window.LectureUI.detail({lectures:chapters,categories:[],completed:{},id:lesson.id});
+    assert.doesNotMatch(html,/STEP 0 \/ FIRST PRINCIPLES/,'old upfront STEP 0: '+lesson.id);
+    assert.doesNotMatch(html,/id="lesson-first-principles"/,'old glossary before text: '+lesson.id);
+    assert.doesNotMatch(html,/class="reader-goals"/,'unnecessary upfront summary: '+lesson.id);
+    assert.match(html,/reader-section/);
+    assert.match(html,/data-action="term-toggle"/,'no inline help within '+lesson.id);
   }
-  for(const chapter of chapters){
-    assert.ok(chapter.primitiveKeys.length>=3,chapter.id+' lacks bottom-level explanations');
-    for(const key of chapter.primitiveKeys)assert.ok(ids.has(key),chapter.id+': invalid concept '+key);
-    const html=app.window.LectureUI.detail({lectures:chapters,categories:[],completed:{},id:chapter.id});
-    assert.match(html,/STEP 0 \/ FIRST PRINCIPLES/);
-    assert.match(html,/そもそも、何の話なのか？/);
-    assert.match(html,/① そもそも何？/);
-    assert.match(html,/② 正常時はどうなっている？/);
-    assert.match(html,/③ 異常が起きると何が変わる？/);
-    assert.match(html,/④ だからQBではここを考える/);
-    assert.match(html,/class="primitive-card" open/);
-    assert.match(html,/lesson-first-principles/);
-  }
-  assert.deepEqual([...chapters.filter(x=>x.curriculumTrack==='drugs')].length,[...Array(29)].length);
+  assert.equal(chapters.filter(x=>x.curriculumTrack==='drugs').length,29);
   assert.equal(chapters.filter(x=>x.curriculumTrack==='reference').length,42);
 });
 
-test('foundational explanations respond to the topic rather than repeating one generic paragraph',()=>{
+test('a word is explained precisely at first occurrence, with another prerequisite one click deeper',()=>{
+  const app=launch(),render=app.window.InlineTerms.render;
+  const result=render('PBPはペプチドグリカンを架橋する。βラクタムがPBPを阻害する。');
+  assert.match(result,/PBP<span class="inline-term-question"/);
+  assert.match(result,/data-term-id="pbp_detail"/);
+  assert.match(result,/data-term-id="pg"/);
+  assert.match(result,/data-term-id="osmotic"/);
+  const triggers=(result.match(/data-action="term-toggle"/g)||[]).length;
+  assert.equal(triggers,3,'one PBP help at its first mention, not twice');
+  const next=app.window.InlineTerms.card('pg',1);
+  assert.match(next,/NAGとNAM/);
+  const deeper=app.window.InlineTerms.card('pbp_detail',2);
+  assert.doesNotMatch(deeper,/data-action="term-related"/,'avoid unbounded recursive nesting');
+  assert.equal(render('意味のない一般文。'),'意味のない一般文。');
+});
+
+test('in-place explanations work for non-drug infections and for quiz choices and rationale',()=>{
+  const app=launch(),lectures=app.window.INFECT_LECTURES;
+  const examples={L02:['Gram','ペプチドグリカン'],L28:['髄液'],L29:['敗血症'],L35:['好中球'],RXV01:['DNA']};
+  for(const [id,words] of Object.entries(examples)){
+    const view=app.window.LectureUI.detail({lectures,categories:[],completed:{},id});
+    assert.match(view,/data-action="term-toggle"/);
+    for(const term of words)assert.ok(view.includes(term),id+' missing '+term);
+  }
+  app.click({route:'library'});
+  app.click({action:'start',mode:'random10'});
+  app.click({action:'answer',index:'0'});
+  assert.match(app.html,/CHECK POINT/);
+  assert.match(app.html,/data-action="term-toggle"/);
+});
+
+test('inline terminology escapes untrusted text and avoids false Latin acronym matches',()=>{
+  const app=launch(),render=app.window.InlineTerms.render;
+  const unsafe=render('<img src=x onerror="attack"> PBP <script>bad</script>');
+  assert.ok(!unsafe.includes('<img src='));
+  assert.ok(!unsafe.includes('<script>'));
+  assert.match(unsafe,/&lt;img/);
+  assert.match(unsafe,/data-term-id="pbp_detail"/);
+  assert.doesNotMatch(render('NOTDNAHERE'),/data-term-id="dnarna"/);
+  const repeated=render('PBP、PBP、PBP。');
+  assert.equal((repeated.match(/data-action="term-toggle"/g)||[]).length,1);
+  assert.match(read('reading-theme.css'),/\.inline-term-trigger:focus-visible/);
+  assert.match(read('reading-theme.css'),/@media\(max-width:750px\)/);
+});
+
+test('on-demand definitions actually describe the underlying normal-to-disease pathway',()=>{
+  const app=launch(),glossary=app.window.InlineTerms;
+  const expected=['pbp_detail','pg','anaerobe','csf_glucose','tcell','cytokine','rt','glycol','g6pd','ivermectin'];
+  for(const id of expected){
+    const term=glossary.get(id);
+    assert.ok(term, id+' is undefined');
+    for(const key of ['what','normal','why']) assert.ok(term[key]?.length>25,id+' missing '+key);
+    const detail=glossary.card(id);
+    assert.match(detail,/そもそも何？/);
+    assert.match(detail,/正常時は？/);
+    assert.match(detail,/なぜ異常・症状につながる？/);
+  }
+});
+
+test('original two bridge narratives are retained at the relevant topic instead of the lecture top',()=>{
   const app=launch(),lessons=app.window.INFECT_LECTURES;
-  const read=id=>app.window.LectureUI.detail({lectures:lessons,categories:[],completed:{},id});
-  assert.match(read('L02'),/Gram染色はどうして紫・赤に分かれる？/);
-  assert.match(read('L28'),/髄膜・髄液・血液脳関門とは何？/);
-  assert.match(read('L29'),/血圧・心拍出量・血管抵抗をゼロから/);
-  assert.match(read('L35'),/CD4・CD8・MHCは何をしている？/);
-  assert.match(read('RXV01'),/ウイルスは「細菌の小さい版」ではない/);
-  assert.match(read('L07'),/30S・50S・翻訳をゼロから/);
-  const css=readFileSync(path.join(root,'reading-theme.css'),'utf8');
-  assert.match(css,/\.primitive-card:focus-visible|\.primitive-card summary:focus-visible/);
-  assert.match(css,/@media\(max-width:750px\)/);
+  const clinical=lessons.filter(l=>/^L\d+$/.test(l.id));
+  assert.equal(clinical.length,39);
+  for(const l of clinical){
+    assert.ok(l.inlineFoundationReflow,l.id+' not reflowed');
+    assert.ok(l.sections.every(s=>!s.title.startsWith('ゼロから｜')&&!s.title.startsWith('なぜ？｜')),l.id+' still frontloads standalone bridge chapters');
+  }
+  const ag=lessons.find(l=>l.id==='L07');
+  assert.match(ag.sections[0].title,/70Sリボソーム/);
+  assert.ok(ag.sections[0].body.includes('30S'));
+  assert.ok(ag.sections.some(s=>s.body.includes('偏性嫌気性菌')));
+});
+
+test('a learner can inspect terminology inside a quiz option without submitting the answer',()=>{
+  const app=launch(),render=app.window.InlineTerms.render;
+  const q=app.window.QUESTION_BANK.find(q=>q.options.some(o=>render(o).includes('data-action="term-toggle"')));
+  assert.ok(q,'question bank needs at least one explainable choice');
+  app.click({action:'single',id:q.id});
+  assert.match(app.html,/data-action="choice-help"/);
+  assert.doesNotMatch(app.html,/class="explain-result/);
+  const panel={hidden:true,innerHTML:''},attributes={};
+  const btn={dataset:{action:'choice-help'},nextElementSibling:panel,setAttribute(k,v){attributes[k]=v}};
+  app.click(btn.dataset,btn);
+  assert.equal(panel.hidden,false);
+  assert.equal(attributes['aria-expanded'],'true');
+  assert.doesNotMatch(app.html,/class="explain-result/,'glossary help must not count as answering');
+  app.click(btn.dataset,btn);
+  assert.equal(panel.hidden,true);
+});
+test('term and nested prerequisite buttons expand on demand without navigation',()=>{
+  const app=launch();
+  app.click({action:'lecture-open',id:'L07'});
+  const chapter=app.html;
+  const panel={hidden:true,innerHTML:'existing definition'},state={};
+  const parent={dataset:{action:'term-toggle',termId:'pbp_detail'},nextElementSibling:panel,setAttribute(k,v){state[k]=v}};
+  app.click(parent.dataset,parent);
+  assert.equal(panel.hidden,false);
+  assert.equal(state['aria-expanded'],'true');
+  assert.equal(app.html,chapter,'opening a definition must not rerender or change route');
+  const child={hidden:true,innerHTML:''},related={};
+  const button={dataset:{action:'term-related',termId:'pg',depth:'1'},nextElementSibling:child,setAttribute(k,v){related[k]=v}};
+  app.click(button.dataset,button);
+  assert.equal(child.hidden,false);
+  assert.match(child.innerHTML,/ペプチドグリカン/);
+  assert.equal(related['aria-expanded'],'true');
 });
