@@ -14,7 +14,7 @@ const scripts=[
   'drug-antiparasitic.js','antibiotic-course.js','non-drug-depth-a.js',
   'non-drug-depth-b.js','non-drug-course.js','non-drug-gaps.js',
   'question-concept-links.js','first-principles-concepts.js',
-  'in-lesson-concepts.js','inline-depth-placement.js','semantic-paragraphs.js','teaching-voice-editorial-a.js','teaching-voice-editorial-b.js','teaching-voice-editorial-c.js','inline-terms-base.js',
+  'in-lesson-concepts.js','inline-depth-placement.js','semantic-paragraphs.js','teaching-voice-editorial-a.js','teaching-voice-editorial-b.js','teaching-voice-editorial-c.js','teaching-voice-editorial-d.js','teaching-voice-editorial-e.js','teaching-voice-editorial-f.js','teaching-voice-editorial-g.js','teaching-voice-editorial-h.js','inline-terms-base.js',
   'inline-terms-mechanisms.js','inline-terms-clinical.js','inline-terms-clarify.js','inline-terms-pathogens.js','inline-terms-molecular-gaps.js','inline-terms.js',
   'lectures-ui.js','app.js'
 ];
@@ -474,8 +474,8 @@ test('authored ChatGPT-like medical explanations cover real paragraphs, not auto
  const edited=ls.filter(l=>targets.includes(l.id));
  assert.equal(edited.length,8);
  const rewritten=edited.flatMap(l=>l.sections.filter(s=>s.teachingVoiceEdited));
- assert.equal(app.window.INFECT_TEACHING_VOICE_STATS.sections,75);
- assert.equal(app.window.INFECT_TEACHING_VOICE_STATS.lessons,8);
+ assert.equal(app.window.INFECT_TEACHING_VOICE_STATS.sections,147);
+ assert.equal(app.window.INFECT_TEACHING_VOICE_STATS.lessons,17);
  assert.equal(rewritten.length,75);
  for(const s of rewritten){
    assert.ok(s.body.length>=160,s.title+' not a complete explanation');
@@ -513,4 +513,29 @@ test('original QB prompts, answer keys and answer options survive explanatory te
  app.click({action:'start',mode:'random10'});
  app.click({action:'answer',index:'0'});
  assert.match(app.html,/CHECK POINT/);
+});
+
+test('all 11 antibacterial medicine chapters now have their core scientific sections authored as full explanations',()=>{
+ const app=launch();
+ const all=app.window.INFECT_LECTURES;
+ const ids=['L03','L04','L05','L06','L07','L08','L09','L10','L11','L12','ABTB'];
+ const lessons=ids.map(id=>all.find(x=>x.id===id));
+ assert.ok(lessons.every(Boolean));
+ let changed=0;
+ for(const l of lessons){
+  const authored=l.sections.filter(s=>s.teachingVoiceEdited);
+  assert.ok(authored.length>=7,l.id+' lacks conversational core sections');
+  for(const s of authored){
+    assert.ok(s.body.length>100,l.id+':'+s.title+' too brief');
+    assert.ok(s.body.includes('。'),l.id+':'+s.title+' does not contain full prose');
+    changed++;
+  }
+ }
+ assert.ok(changed>=90,'expected comprehensive core antibacterial rewrite');
+ assert.equal(app.window.INFECT_TEACHING_VOICE_STATS.sections,147);
+ assert.equal(app.window.INFECT_TEACHING_VOICE_STATS.lessons,17);
+ assert.match(all.find(x=>x.id==='L06').sections.find(s=>s.title==='イミペネムにシラスタチンが付く理由').body,/デヒドロペプチダーゼ/);
+ assert.match(all.find(x=>x.id==='L11').sections.find(s=>s.title==='VREはどうして効かない？').body,/D-Ala-D-Lac/);
+ assert.match(all.find(x=>x.id==='L08').sections.find(s=>s.title==='30Sで何を妨げるか').body,/A部位/);
+ assert.match(all.find(x=>x.id==='ABTB').sections.find(s=>s.title==='なぜ最初から多剤を併用する？').body,/耐性/);
 });
