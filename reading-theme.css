@@ -271,3 +271,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
  .reader-search input,.filterbar select{font-size:16px}
  .reader-hero-meta{gap:9px}
 }
+
+
+/* Accessible text-size control in the lesson header */
+.reader-backline-actions{display:flex;align-items:center;gap:12px}
+@media(max-width:390px){.reader-backline-actions{gap:6px}.reader-backline-actions span{white-space:nowrap;font-size:10px}}
