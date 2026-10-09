@@ -43,10 +43,10 @@ function launch() {
 test('deep lectures cover all eight infection disciplines', () => {
   const app = launch();
   const lessons = app.window.INFECT_LECTURES;
-  assert.equal(lessons.length, 29);
+  assert.equal(lessons.length, 39);
   assert.equal(new Set(lessons.map(l => l.category)).size, 8);
   assert.equal(new Set(lessons.map(l => l.id)).size, lessons.length);
-  assert.ok(lessons.every(l => l.sections.length >= 5));
+  assert.ok(lessons.every(l => l.sections.length >= 8));
   assert.ok(lessons.every(l => l.sections.every(s => s.title && s.body.length > 30)));
 });
 
