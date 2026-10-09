@@ -49,20 +49,24 @@ test('theme and font sizes are accessible across desktop/tablet/mobile',()=>{
  assert.match(css,/\.reader-mobile-toc\{display:block/);
  assert.match(css,/\.reader-course-tile\[hidden\]/);
 });
-test('new long-form lecture view is divided into manageable paragraphs',()=>{
+test('long-form lecture keeps natural paragraphs without arbitrary lead breaks',()=>{
  const f=fixture();f.click({route:'lectures'});assert.match(f.html,/reader-library-head/);
  f.click({action:'lecture-open',id:'L07'});
  assert.match(f.html,/reader-hero/);
  assert.match(f.html,/reader-section-label/);
- assert.match(f.html,/reader-lead/);
+ assert.doesNotMatch(f.html,/class="reader-lead"/);
  assert.match(f.html,/reader-prose/);
  assert.match(f.html,/reader-mobile-toc/);
  assert.match(f.html,/reader-reading-fill/);
  assert.match(f.html,/reader-font-mobile/);
  const result=f.window.LectureUI.paragraphs('第一文。第二文。第三文。第四文。');
- assert.equal(result.lead,'第一文。');
- assert.equal(result.body.length,2);
- assert.equal(result.body[0],'第二文。第三文。');
+ assert.equal(result.lead,'');
+ assert.equal(result.body.length,1);
+ assert.equal(result.body[0],'第一文。第二文。第三文。第四文。');
+ const authored=f.window.LectureUI.paragraphs('第1段落。続く文。\\n\\n第2段落。');
+ assert.equal(authored.body.length,2);
+ assert.equal(authored.body[0],'第1段落。続く文。');
+ assert.equal(authored.body[1],'第2段落。');
 });
 test('search filters cards and reports count without changing focus',()=>{
  const f=fixture();f.click({route:'lectures'});
