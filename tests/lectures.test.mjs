@@ -112,7 +112,7 @@ test('lecture reader search filters and escapes user-facing text', () => {
   const categories = [{ id: 'antibiotics', name: '抗菌薬' }];
   const results = ui.list({ lectures: lessons, categories, completed: {}, filter: 'antibiotics', search: 'アミノグリコシド' });
   assert.match(results, /アミノグリコシド/);
-  assert.match(results, /1<\/strong> 講義/);
+  assert.match(results, /2<\/strong> 講義/); // The tetracycline lecture also mentions aminoglycosides
   assert.ok(!results.includes('ペニシリン系をゼロから'));
   const output = ui.detail({
     lectures: [{ id: 'safe', title: '<img src=x onerror=alert(1)>', subtitle: '', category: 'antibiotics', sections: [{ title: '<b>unsafe</b>', body: 'first。second。third。' }] }],
