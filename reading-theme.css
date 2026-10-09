@@ -276,3 +276,29 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 /* Accessible text-size control in the lesson header */
 .reader-backline-actions{display:flex;align-items:center;gap:12px}
 @media(max-width:390px){.reader-backline-actions{gap:6px}.reader-backline-actions span{white-space:nowrap;font-size:10px}}
+
+
+/* First-principles curriculum: distinct starting point and quick conceptual backtracking. */
+.foundation-overview{margin:7px 0 27px;padding:22px 25px;border:1px solid #badbd5;border-left:4px solid #118879;border-radius:13px;background:#eff8f6;color:#224a4b}
+.foundation-overview strong{display:block;font-size:16px;line-height:1.65;color:#0d6059}
+.foundation-overview p{margin:7px 0 0;font-size:13px;line-height:1.9;color:#4b6e70}
+.prerequisite-map{margin:22px 0 0;border:1px solid #d6e6e2;border-radius:16px;background:#f5fbf9;padding:24px 28px}
+.prereq-overline{font-weight:850;letter-spacing:.11em;font-size:10px;color:#0e776d;margin-bottom:8px}
+.prerequisite-map h2{font-size:clamp(17px,2.1vw,21px);line-height:1.6;margin:0 0 7px;color:#174d50}
+.prerequisite-map p{color:#507577;line-height:1.9;font-size:13px;margin:0 0 16px}
+.prereq-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.prereq-link{display:grid;grid-template-columns:1fr auto;gap:2px 10px;text-align:left;align-items:center;background:#fff;border:1px solid #d2e4df;color:#28545a;border-radius:11px;padding:13px 14px;min-height:81px}
+.prereq-link:hover{border-color:#09857a;box-shadow:0 4px 15px rgba(17,111,100,.1)}
+.prereq-link>span:first-child{grid-column:1;color:#158579;font-size:10px;font-weight:800}
+.prereq-link strong{grid-column:1;font-size:12px;font-weight:800;line-height:1.45}
+.prereq-link>span:last-child{grid-column:2;grid-row:1/3;color:#13877b;font-size:18px}
+.reader-section:has(.reader-section-label){} /* no change to the specialist reader typography */
+@media(max-width:1050px){.prereq-links{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:750px){
+.foundation-overview{padding:18px 16px;margin-bottom:19px}
+.foundation-overview strong{font-size:14px}
+.prerequisite-map{padding:20px 16px;margin:15px 0 0}
+.prerequisite-map h2{font-size:17px}
+.prereq-links{grid-template-columns:1fr;gap:8px}
+.prereq-link{min-height:70px}
+}
