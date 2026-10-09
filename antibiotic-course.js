@@ -32,7 +32,16 @@
     ...(tb?.sections || []).filter((s,i)=>!s.title.startsWith("ゼロから")&&!s.title.startsWith("なぜ？")).map(s=>({...s,title:"補足｜"+s.title}))
    ]
  };
- const additional = (window.INFECT_OTHER_DRUG_MODULES || []).map((l,i)=>({...l,curriculumTrack:"drugs",sequence:order.length+2+i,prereqs:[]}));
+ const qmap={
+ RXV00:["V001","V004"],RXV01:["V005","V012"],RXV02:["V006"],RXV03:["V001","V007"],
+ RXV04:["V002","V011"],RXV05:["V003"],RXV06:["V013"],
+ RXF00:["M001","M002"],RXF01:["M006","M010"],RXF02:["M007"],RXF03:["M008","M005"],RXF04:["M001","M002"],
+ RXP00:["P001","P002","P012"],RXP01:["P003","P004","P008"],RXP02:["P005","P006"],
+ RXH00:["P011","P013"],RXH01:["P009"],RXH02:["P011","P013"]
+ };
+ const additional = (window.INFECT_OTHER_DRUG_MODULES || []).map((l,i)=>({...l,
+  curriculumTrack:"drugs",sequence:order.length+2+i,prereqs:[],questionIds:qmap[l.id]||[]
+ }));
  const primary = [...order,tbLesson,...additional];
  const mainIDs = new Set(primary.map(x=>x.id));
  if(mainIDs.size !== primary.length)throw Error("Duplicate medication lecture ID");
