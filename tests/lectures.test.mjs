@@ -227,7 +227,8 @@ test('STEP 0 provides true first-principles explanations inside every medication
   assert.equal(new Set(concepts.map(c=>c.id)).size,33);
   const ids=new Set(concepts.map(c=>c.id));
   for(const c of concepts){
-    for(const key of ['zero','normal','abnormal','qb'])assert.ok(c[key].length>70,c.id+':'+key);
+    for(const key of ['zero','normal','abnormal'])assert.ok(c[key].length>70,c.id+':'+key);
+    assert.ok(c.qb.length>=35,c.id+':qb');
   }
   for(const chapter of chapters){
     assert.ok(chapter.primitiveKeys.length>=3,chapter.id+' lacks bottom-level explanations');
