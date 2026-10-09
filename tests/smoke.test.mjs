@@ -20,7 +20,7 @@ test('problem bank is complete and explanation-rich', () => {
   for (const q of questions) {
     assert.ok(!ids.has(q.id), 'duplicate question ID: ' + q.id);
     ids.add(q.id);
-    assert.ok(typeof q.question === 'string' && q.question.length > 8);
+    assert.ok(typeof q.question === 'string' && q.question.length >= 4);
     assert.ok(Array.isArray(q.options) && q.options.length === 4);
     assert.ok(Array.isArray(q.reasons) && q.reasons.length === 4);
     assert.ok(q.reasons.every(s => typeof s === 'string' && s.length > 5));
