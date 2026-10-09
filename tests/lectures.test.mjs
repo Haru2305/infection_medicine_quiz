@@ -226,7 +226,7 @@ test('full course shows help where an unknown word appears, not an upfront STEP 
   const glossary=app.window.InlineTerms;
   assert.equal(chapters.length,71);
   assert.equal(app.window.INFECT_PRIMITIVE_CONCEPTS.length,33);
-  assert.equal(glossary.list().length,107);
+  assert.equal(glossary.list().length,159);
   for(const lesson of chapters){
     const html=app.window.LectureUI.detail({lectures:chapters,categories:[],completed:{},id:lesson.id});
     assert.doesNotMatch(html,/STEP 0 \/ FIRST PRINCIPLES/,'old upfront STEP 0: '+lesson.id);
