@@ -14,8 +14,8 @@ const scripts=[
   'drug-antiparasitic.js','antibiotic-course.js','non-drug-depth-a.js',
   'non-drug-depth-b.js','non-drug-course.js','non-drug-gaps.js',
   'question-concept-links.js','first-principles-concepts.js',
-  'in-lesson-concepts.js','inline-terms-base.js',
-  'inline-terms-mechanisms.js','inline-terms-clinical.js','inline-terms.js',
+  'in-lesson-concepts.js','inline-depth-placement.js','inline-terms-base.js',
+  'inline-terms-mechanisms.js','inline-terms-clinical.js','inline-terms-clarify.js','inline-terms.js',
   'lectures-ui.js','app.js'
 ];
 function launch(){
@@ -180,7 +180,7 @@ test('all non-drug infection lessons now teach from first principles within thei
   assert.equal(nonDrug.length,29);
   assert.equal(Object.values(app.window.INFECT_NONDRUG_DEPTH).reduce((n,x)=>n+x.length,0),87);
   for(const l of nonDrug){
-    assert.ok(l.sections.length>=13,l.id+' is missing in-lesson depth');
+    assert.ok(l.sections.length>=11,l.id+' is missing in-lesson depth');
     assert.ok(l.sections.slice(2,5).every(s=>s.body.length>=120),l.id+' is too superficial');
     assert.ok(l.sections.slice(2,5).every(s=>s.body.includes('。')),l.id+' does not explain concepts');
   }
@@ -296,4 +296,18 @@ test('on-demand definitions actually describe the underlying normal-to-disease p
     assert.match(detail,/正常時は？/);
     assert.match(detail,/なぜ異常・症状につながる？/);
   }
+});
+
+test('original two bridge narratives are retained at the relevant topic instead of the lecture top',()=>{
+  const app=launch(),lessons=app.window.INFECT_LECTURES;
+  const clinical=lessons.filter(l=>/^L\d+$/.test(l.id));
+  assert.equal(clinical.length,39);
+  for(const l of clinical){
+    assert.ok(l.inlineFoundationReflow,l.id+' not reflowed');
+    assert.ok(l.sections.every(s=>!s.title.startsWith('ゼロから｜')&&!s.title.startsWith('なぜ？｜')),l.id+' still frontloads standalone bridge chapters');
+  }
+  const ag=lessons.find(l=>l.id==='L07');
+  assert.match(ag.sections[0].title,/70Sリボソーム/);
+  assert.ok(ag.sections[0].body.includes('30S'));
+  assert.ok(ag.sections.some(s=>s.body.includes('偏性嫌気性菌')));
 });
