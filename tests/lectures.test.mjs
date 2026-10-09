@@ -74,7 +74,7 @@ test('each drug course contains its own background biology and deep pharmacology
   assert.ok(byId.RXF02.sections.some(s=>s.body.includes('グルカン')));
   assert.ok(byId.RXP00.sections.some(s=>s.body.includes('G6PD')));
   assert.ok(byId.RXH01.sections.some(s=>s.body.includes('Clチャネル')));
-  assert.ok(byId.RXH02.sections.some(s=>s.body.includes('Ca2+')));
+  assert.ok(byId.RXH02.sections.some(s=>s.body.includes('Ca²⁺')||s.body.includes('Ca2+')));
 });
 
 test('drug chapters connect only to existing 4-choice quiz question IDs',()=>{
