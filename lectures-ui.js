@@ -22,7 +22,7 @@ function detail({lectures,categories,header,completed,id}){
  return '<div class="course-top"><button class="back" data-route="lectures">← 講義ライブラリに戻る</button><span class="tag">'+esc(category(lesson.category,categories))+'</span></div>'
  +header('DEEP DIVE · '+lesson.id,lesson.title,lesson.subtitle)
  +'<div class="course-layout"><aside class="course-toc"><strong>講義の目次</strong>'+toc+'</aside><div class="course-body">'+articles
- +'<div class="course-complete"><strong>理解したら、クイズで定着。</strong><p>作用機序や鑑別を自分の言葉で説明できるか確認しよう。読了マークはいつでも取り消せます。</p><div class="panel-actions"><button class="btn btn-primary" data-action="lecture-mark" data-id="'+esc(id)+'">'+(done?'✓ 読了を取り消す':'✓ 読了を記録する')+'</button><button class="btn btn-ghost" data-action="category" data-cat="'+esc(lesson.category)+'">この分野の問題へ →</button></div></div>'
+ +'<div class="course-complete"><strong>講義を学んだら、理解度チェック。</strong><p>いま読んだ章に対応する問題を解いて、正解の理由も不正解の理由も確かめよう。読了マークはいつでも変更できます。</p><div class="panel-actions"><button class="btn btn-primary" data-action="lecture-quiz" data-id="'+esc(id)+'">この講義の確認テスト（'+(lesson.questionIds?.length||0)+'問） →</button><button class="btn btn-ghost" data-action="lecture-mark" data-id="'+esc(id)+'">'+(done?'✓ 読了を取り消す':'✓ 読了を記録する')+'</button><button class="btn btn-ghost" data-action="category" data-cat="'+esc(lesson.category)+'">分野の全問題へ →</button></div></div>'
  +'<div class="course-next"><span>'+(prev?'<button class="btn btn-ghost btn-sm" data-action="lecture-open" data-id="'+esc(prev.id)+'">← '+esc(prev.title)+'</button>':'')+'</span><span>'+(next?'<button class="btn btn-primary btn-sm" data-action="lecture-open" data-id="'+esc(next.id)+'">'+esc(next.title)+' →</button>':'')+'</span></div>'
  +'</div></div>';
 }
