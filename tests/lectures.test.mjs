@@ -14,7 +14,7 @@ const scripts=[
   'drug-antiparasitic.js','antibiotic-course.js','non-drug-depth-a.js',
   'non-drug-depth-b.js','non-drug-course.js','non-drug-gaps.js',
   'question-concept-links.js','first-principles-concepts.js',
-  'in-lesson-concepts.js','inline-depth-placement.js','semantic-paragraphs.js','teaching-voice-editorial-a.js','teaching-voice-editorial-b.js','teaching-voice-editorial-c.js','inline-terms-base.js',
+  'in-lesson-concepts.js','inline-depth-placement.js','semantic-paragraphs.js','teaching-voice-editorial-a.js','teaching-voice-editorial-b.js','teaching-voice-editorial-c.js','teaching-voice-editorial-d.js','teaching-voice-editorial-e.js','inline-terms-base.js',
   'inline-terms-mechanisms.js','inline-terms-clinical.js','inline-terms-clarify.js','inline-terms-pathogens.js','inline-terms-molecular-gaps.js','inline-terms.js',
   'lectures-ui.js','app.js'
 ];
@@ -513,4 +513,44 @@ test('original QB prompts, answer keys and answer options survive explanatory te
  app.click({action:'start',mode:'random10'});
  app.click({action:'answer',index:'0'});
  assert.match(app.html,/CHECK POINT/);
+});
+
+test('authored chat-style teaching reaches both medication and non-drug chapters',()=>{
+ const app=launch(),chapters=app.window.INFECT_LECTURES;
+ const planned=['L02','L04','L07','L17','L21','L23','L25','L28','L29','L35','RXV01','RXF01','RXP00'];
+ for(const id of planned){
+  const l=chapters.find(x=>x.id===id);
+  assert.ok(l,id+' not present');
+  assert.ok(l.sections.filter(s=>s.teachingVoiceEdited).length>=5,id+' lacks actual authored explanations');
+  const explanation=l.sections.find(s=>s.teachingVoiceEdited)?.body||'';
+  assert.match(explanation,/なぜ|どう|まず|何|そもそも|正常|違う|理由|？/,id+' needs underlying reasoning');
+  assert.match(explanation,/\n\n/,id+' needs pedagogical paragraph breaks');
+ }
+ assert.equal(app.window.INFECT_TEACHING_VOICE_STATS.lessons,planned.length);
+ const revised=chapters.flatMap(l=>l.sections).filter(s=>s.teachingVoiceEdited);
+ assert.ok(revised.length>=70,'fewer than 70 sections substantively rewritten');
+ assert.ok(revised.every(s=>s.body.length>=100),'explanations must not be just a short label');
+ assert.ok(revised.every(s=>!s.body.includes('**')),'plain text should not show raw markdown stars');
+ assert.equal(chapters.length,71);
+ assert.equal(app.window.QUESTION_BANK.length,102);
+});
+
+test('all four choice rationales are substantive for each of the 19 rewritten questions',()=>{
+ const app=launch(),ids=new Set(['A001','A002','A003','A004','A005','A006','A007','A008','A009','A010','A011','A012','A013','A014','A015','A016','A017','A018','D010']);
+ let matched=0;
+ for(const q of app.window.QUESTION_BANK){
+  if(!ids.has(q.id))continue;
+  matched++;
+  assert.equal(q.teachingVoiceEdited,true,q.id+' not upgraded');
+  assert.ok(q.explanation.length>=80,q.id+' too little explanation');
+  assert.equal(q.reasons.length,4);
+  for(const [i,reason] of q.reasons.entries()){
+   assert.ok(reason.length>=25,q.id+' choice '+i+' does not explain why');
+   assert.match(reason,/正解|違う|標的|酵素|作用|作用点|構造|菌|細胞|DNA|RNA|原因|仕組み|意味|薬|投与|危険|理由|効果|活性|重要/,q.id+' choice '+i+' is just an answer label');
+  }
+ }
+ assert.equal(matched,19);
+ const v=app.window.LectureUI.detail({lectures:app.window.INFECT_LECTURES,categories:[],completed:{},id:'L07'});
+ assert.match(v,/なんで|どうして|なぜ|どう/);
+ assert.match(v,/data-action="term-toggle"/,'keep inline prerequisite help');
 });
