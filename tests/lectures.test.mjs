@@ -8,7 +8,7 @@ import path from 'node:path';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=name=>readFileSync(path.join(root,name),'utf8');
 const scripts=[
-  'questions.js','teaching-voice-quiz-a.js','lectures.js','foundation-roots.js','foundation-bridges-a.js',
+  'questions.js','teaching-voice-quiz-a.js','teaching-voice-quiz-b.js','teaching-voice-quiz-c.js','lectures.js','foundation-roots.js','foundation-bridges-a.js',
   'foundation-bridges-b.js','curriculum-init.js','antibiotic-depth-a.js',
   'antibiotic-depth-b.js','drug-antiviral.js','drug-antifungal.js',
   'drug-antiparasitic.js','antibiotic-course.js','non-drug-depth-a.js',
@@ -487,9 +487,9 @@ test('authored ChatGPT-like medical explanations cover real paragraphs, not auto
  assert.match(ls.find(l=>l.id==='L17').sections.find(s=>s.title==='細菌との根本的相違').body,/リボソーム/);
  assert.match(ls.find(l=>l.id==='L21').sections.find(s=>s.title==='真菌細胞の構造').body,/ヒト/);
  assert.equal(bank.length,102);
- assert.equal(app.window.INFECT_TEACHING_QB_STATS.authored,19);
+ assert.equal(app.window.INFECT_TEACHING_QB_STATS.authored,44);
  const explanations=bank.filter(q=>q.teachingVoiceEdited);
- assert.equal(explanations.length,19);
+ assert.equal(explanations.length,44);
  for(const q of explanations){
    assert.ok(q.explanation.length>=80,q.id+' needs actual mechanism');
    assert.equal(q.reasons.length,4);
@@ -656,4 +656,44 @@ test('fungal and parasite deep explanations compare normal structures and affect
  assert.match(lookup('RXH02','住血吸虫の卵と病態'),/肉芽腫/);
  const html=app.window.LectureUI.detail({lectures:ls,categories:[],completed:{},id:'RXF02'});
  assert.match(html,/data-action="term-toggle"/,'on-demand prerequisite help remains available');
+});
+
+test('all 25 foundations and bacteriology MCQs have four causal rationales including every distractor',()=>{
+ const app=launch(),bank=app.window.QUESTION_BANK;
+ const ids=[...Array.from({length:12},(_,i)=>'F'+String(i+1).padStart(3,'0')),
+            ...Array.from({length:13},(_,i)=>'B'+String(i+1).padStart(3,'0'))];
+ assert.equal(ids.length,25);
+ for(const id of ids){
+   const q=bank.find(x=>x.id===id);
+   assert.ok(q?.teachingVoiceEdited,id+' not updated');
+   assert.ok(q.explanation.length>=80,id+' explanation too shallow');
+   assert.equal(q.reasons.length,4);
+   assert.ok(q.reasons[q.answer].startsWith('○ 正解'),id+' correct rationale not marked');
+   for(let i=0;i<4;i++){
+     const reason=q.reasons[i];
+     assert.ok(reason.length>=35,id+' choice '+i+' lacks explanatory depth');
+     if(i!==q.answer) assert.ok(reason.startsWith('×'),id+' wrong choice '+i+' has no rationale');
+   }
+ }
+ assert.equal(app.window.INFECT_TEACHING_QB_STATS.authored,44);
+ assert.equal(bank.length,102);
+ const allEdited=bank.filter(q=>q.teachingVoiceEdited);
+ assert.equal(allEdited.length,44);
+});
+
+test('authored foundation distractor rationales survive quiz rendering and preserve original answer key',()=>{
+ const app=launch(),original={};
+ vm.runInNewContext(read('questions.js'),{window:original},{filename:'questions.js'});
+ for(const [i,now] of app.window.QUESTION_BANK.entries()){
+   const before=original.QUESTION_BANK[i];
+   assert.equal(now.id,before.id);
+   assert.equal(now.question,before.question);
+   assert.equal(now.answer,before.answer);
+   assert.deepEqual(Array.from(now.options),Array.from(before.options));
+ }
+ const f=app.window.QUESTION_BANK.find(q=>q.id==='F005');
+ assert.match(f.explanation,/ペプチドグリカン/);
+ assert.match(f.reasons[0],/Gram陰性菌/);
+ const b=app.window.QUESTION_BANK.find(q=>q.id==='B010');
+ assert.match(b.reasons[0],/正解/);
 });
