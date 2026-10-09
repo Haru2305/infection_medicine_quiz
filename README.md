@@ -15,20 +15,6 @@
 
 全問に **正解の解説／誤答3選択肢それぞれの理由／チェックポイント** を掲載。
 
-## 詳しい講義（新設）
-
-クイズとは独立して、**29講義・8分野の長文講義**を収録。アミノグリコシド系を含む薬剤機序だけでなく、病原体の構造、病態生理、検査、鑑別、治療・副作用まで段階的に扱います。
-
-- ダッシュボードの「本格講義を読む」またはサイドバー／スマホ下部の「講義」タブから閲覧
-- 各講義は見出し付きの連続セクションで構成。目次から章へジャンプ可能
-- 8分野フィルタ、次の講義／前の講義、カテゴリ別クイズへの移動
-- 読了状態は端末内保存。学習記録のJSONバックアップにも含める
-- 既存102問の設問ID・学習履歴・解説は維持
-
-講義データは `lectures.js`、閲覧画面は `lectures-ui.js`。新規講義は `{id,category,title,subtitle,sections:[{title,body}]}` 形式で追加できます。
-
-**原稿について：** ユーザーが指定した過去のChatGPT共有リンク本文は取得できていないため、「過去チャットと完全同一の構成・密度」との照合は未実施です。今回の原稿は医学教育用に新規作成した初版です。薬剤の適応・推奨は個々の患者・施設・地域で異なります。
-
 ## 講義ライブラリ — 39章・314セクション
 
 短い「まとめノート」に加えて、**全8分野を深く読む講義モード**を追加しました。
@@ -51,6 +37,7 @@
 ## 品質チェック
 
 Node.js 22以上で `node --test tests/*.test.mjs` を実行。問題形式、全選択肢の理由、講義の欠落、リンク先ID、画面遷移、読了履歴保存、旧回答記録の保持を確認します。GitHub Actionsでも同じテストが実行されます。
+
 ## 主な機能
 
 - カテゴリ別演習・レベル別フィルタ・ランダム10問
@@ -95,16 +82,14 @@ GitHub Pagesで公開する場合は、GitHubリポジトリの **Settings → P
 ## ファイル構成
 
 ```text
-index.html       アプリ本体
-styles.css       レスポンシブUI
-app.js           出題・復習・記録管理、講義画面の連携
-lectures.js      29講義の本文データ
-lectures-ui.js   講義一覧・本文・読了UI
-questions.js     オリジナル問題データ
-lectures.js      39講義の教材データ
-lectures-ui.js   講義ライブラリ・閲覧画面
-tests/           自動テスト
-.github/workflows/ci.yml  CI設定
-favicon.svg      アイコン
-.nojekyll        GitHub Pages用
+index.html                アプリ本体
+styles.css                レスポンシブUI
+app.js                    出題・復習・記録管理、講義機能連携
+questions.js              102問のオリジナル4択問題
+lectures.js               39講義の本文・対応問題ID
+lectures-ui.js            講義一覧・目次・読了・確認テスト導線
+tests/                    Nodeによる自動テスト
+.github/workflows/verify.yml  GitHub Actions
+favicon.svg               アイコン
+.nojekyll                 GitHub Pages用
 ```
