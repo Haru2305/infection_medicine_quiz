@@ -47,8 +47,9 @@
       +'<span class="reader-course-title">'+html(l.title)+'</span><span class="reader-course-description">'+html(l.subtitle)+'</span>'
       +'<span class="reader-course-footer">'+l.sections.length+' セクション <span class="reader-dot">·</span> 約'+minutes(l)+'分'
       +'<span class="reader-course-arrow" aria-hidden="true">↗</span></span></button>';
+    const referenceGroups=categories.length?categories:[...new Set(visible.map(l=>l.category))].map(id=>({id,name:catName(id,categories)}));
     const chunks=showReference
-      ? categories.filter(c=>visible.some(l=>l.category===c.id)).map(c=>{
+      ? referenceGroups.filter(c=>visible.some(l=>l.category===c.id)).map(c=>{
           const part=visible.filter(l=>l.category===c.id);
           return '<section class="drug-group reference-group" data-ref-category="'+html(c.id)+'">'
             +'<div class="drug-group-heading"><div><span class="drug-group-number">MICROBIOLOGY / FOUNDATIONS</span>'
