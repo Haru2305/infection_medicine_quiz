@@ -80,7 +80,7 @@
     return '<div class="course-shell reader-detail'+(largeText?' text-large':'')+'">'
       + '<div class="reader-reading-bar" aria-hidden="true"><div class="reader-reading-fill" id="reader-reading-fill"></div></div>'
       + '<div class="reader-backline"><button data-route="lectures" class="reader-back">← 講義一覧に戻る</button>'
-      + '<span>講義 '+String(idx+1).padStart(2,'0')+' / '+lectures.length+'</span></div>'
+      + '<div class="reader-backline-actions"><button class="reader-font-mobile" data-action="reader-font" aria-pressed="'+largeText+'" aria-label="文字サイズを変更">'+(largeText?'標準文字':'A+ 大きく')+'</button><span>講義 '+String(idx+1).padStart(2,'0')+' / '+lectures.length+'</span></div></div>'
       + '<header class="reader-hero"><div class="reader-hero-eyebrow">'+html(catName(l.category,categories))+' <span>／</span> '+html(l.id)+'</div>'
       + '<h1>'+html(l.title)+'</h1><p>'+html(l.subtitle)+'</p>'
       + '<div class="reader-hero-meta"><span>◷ 約'+minutes(l)+'分</span><span>▤ '+l.sections.length+'セクション</span>'

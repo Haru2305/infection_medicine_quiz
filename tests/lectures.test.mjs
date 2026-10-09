@@ -88,3 +88,50 @@ test('script dependencies load in the correct order', () => {
   assert.ok(offsets.every(x => x !== -1));
   assert.ok(offsets.every((x, i) => i === 0 || x > offsets[i - 1]));
 });
+
+test('reader shows scannable chapter sections and mobile contents', () => {
+  const app = launch();
+  app.click({ route: 'lectures' });
+  assert.match(app.html, /reader-library-head/);
+  assert.match(app.html, /reader-search/);
+  assert.match(app.html, /reader-course-grid/);
+  app.click({ action: 'lecture-open', id: 'L07' });
+  assert.match(app.html, /reader-mobile-toc/);
+  assert.match(app.html, /reader-font-mobile/);
+  assert.match(app.html, /reader-goals/);
+  assert.match(app.html, /reader-reading-fill/);
+  assert.match(app.html, /まず押さえる/);
+  assert.ok((app.html.match(/class="reader-prose"/g) || []).length >= 5);
+  assert.match(app.html, /嫌気性菌/);
+});
+
+test('lecture reader search filters and escapes user-facing text', () => {
+  const app = launch();
+  const ui = app.window.LectureUI;
+  const lessons = app.window.INFECT_LECTURES;
+  const categories = [{ id: 'antibiotics', name: '抗菌薬' }];
+  const results = ui.list({ lectures: lessons, categories, completed: {}, filter: 'antibiotics', search: 'アミノグリコシド' });
+  assert.match(results, /アミノグリコシド/);
+  assert.match(results, /2<\/strong> 講義/); // The tetracycline lecture also mentions aminoglycosides
+  assert.ok(!results.includes('ペニシリン系をゼロから'));
+  const output = ui.detail({
+    lectures: [{ id: 'safe', title: '<img src=x onerror=alert(1)>', subtitle: '', category: 'antibiotics', sections: [{ title: '<b>unsafe</b>', body: 'first。second。third。' }] }],
+    categories, completed: {}, id: 'safe'
+  });
+  assert.ok(!output.includes('<img src=x'));
+  assert.ok(!output.includes('<b>unsafe</b>'));
+  assert.match(output, /first/);
+  const paras = ui.paragraphs('背景。要点その1。要点その2。もうひとつ。');
+  assert.equal(paras.lead, '背景。');
+  assert.equal(paras.body.length, 2);
+});
+
+test('responsive reading theme and all scripts are linked', () => {
+  const index = read('index.html');
+  const css = read('reading-theme.css');
+  assert.match(index, /reading-theme.css/);
+  assert.match(css, /@media\(max-width:750px\)/);
+  assert.match(css, /\.reader-mobile-toc/);
+  assert.match(css, /\.reader-prose p/);
+  assert.match(css, /\.reader-font-mobile/);
+});
