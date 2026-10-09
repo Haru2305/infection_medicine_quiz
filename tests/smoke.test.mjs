@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 const read = file => fs.readFileSync(new URL('../' + file, import.meta.url), 'utf8');
-const scripts = ['questions.js','lectures.js','foundation-roots.js','foundation-bridges-a.js','foundation-bridges-b.js','curriculum-init.js','antibiotic-depth-a.js','antibiotic-depth-b.js','drug-antiviral.js','drug-antifungal.js','drug-antiparasitic.js','antibiotic-course.js','non-drug-depth-a.js','non-drug-depth-b.js','non-drug-course.js','non-drug-gaps.js','question-concept-links.js','first-principles-concepts.js','in-lesson-concepts.js','lectures-ui.js','app.js'];
+const scripts = ['questions.js','lectures.js','foundation-roots.js','foundation-bridges-a.js','foundation-bridges-b.js','curriculum-init.js','antibiotic-depth-a.js','antibiotic-depth-b.js','drug-antiviral.js','drug-antifungal.js','drug-antiparasitic.js','antibiotic-course.js','non-drug-depth-a.js','non-drug-depth-b.js','non-drug-course.js','non-drug-gaps.js','question-concept-links.js','first-principles-concepts.js','in-lesson-concepts.js','inline-terms-base.js','inline-terms-mechanisms.js','inline-terms-clinical.js','inline-terms.js','lectures-ui.js','app.js'];
 const windowData = {};
 vm.runInNewContext(read('questions.js'), { window: windowData }, { filename: 'questions.js' });
 vm.runInNewContext(read('lectures.js'), { window: windowData }, { filename: 'lectures.js' });
@@ -100,8 +100,9 @@ test('page boot + lecture navigation + reading record + targeted quiz works', ()
   assert.match(s.app.innerHTML, /アミノグリコシド系/);
   s.click({ action: 'lecture-open', id: 'L07' });
   assert.match(s.app.innerHTML, /嫌気性菌/);
-  assert.ok(s.app.innerHTML.includes('STEP 0 / FIRST PRINCIPLES'));
-  assert.match(s.app.innerHTML, /30S・50S・翻訳をゼロから/);
+  assert.doesNotMatch(s.app.innerHTML, /STEP 0 \/ FIRST PRINCIPLES/);
+  assert.match(s.app.innerHTML, /data-action="term-toggle"/);
+  assert.match(s.app.innerHTML, /data-term-id="atp"|data-term-id="ribosome"/);
   assert.match(s.app.innerHTML, /講義の確認テスト/);
   s.click({ action: 'lecture-mark', id: 'L07' });
   const latest = JSON.parse(s.localStorage.getItem('infectlab-v1'));
