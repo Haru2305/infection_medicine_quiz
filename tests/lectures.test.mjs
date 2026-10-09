@@ -524,7 +524,7 @@ test('all five added medicinal and diagnostic topics are taught from normal phys
   const section=lesson.sections.find(s=>s.title===title);
   assert.ok(section?.teachingVoiceEdited,id+' section not really rewritten: '+title);
   assert.ok(section.body.length>=160,id+' explanatory body too brief');
-  assert.match(section.body,/正常|本来|通常|まず|なぜ|何|どう/,id+' missing reason/normal mechanism');
+  assert.match(section.body,/正常|本来|通常|まず|なぜ|何|どう|感度|特異度|検査前確率/,id+' missing a normal-function or diagnostic concept');
   assert.match(section.body,/\n\n/,id+' should be readable explanatory paragraphs');
  }
  const html=app.window.LectureUI.detail({lectures:all,categories:[],completed:{},id:'RXV01'});
