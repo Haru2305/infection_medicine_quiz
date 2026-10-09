@@ -1,6 +1,7 @@
 (() => {
 'use strict';
 const BANK = window.QUESTION_BANK || [];
+const LECTURES = window.INFECT_LECTURES || [];
 const CATEGORIES = [
  {id:'basics',name:'感染症の基礎',desc:'微生物の分類・細胞構造',icon:'◉',color:'#7de0d7',bg:'#1a3c45'},
  {id:'bacteria',name:'細菌学',desc:'Gram染色・代表的な起因菌',icon:'▦',color:'#85aaff',bg:'#253352'},
