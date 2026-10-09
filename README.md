@@ -42,9 +42,9 @@
 4. **他とどう違う？**：似ている疾患・薬剤・検査を区別し、QBの誤答が誤りの理由も書く
 5. **その文章で初めて必要になった場所**で説明する：導入の総まとめや強制的な基礎章に戻さない
 
-**2026-10-09現在の手作業による改稿範囲：** 16講義の154セクション（前段階の13講義112セクションに、抗菌薬の選択総論・セフェム系・カルバペネム系の3講義42セクションを追加）および既存19問の解説と4択の理由。**まだ全71講義・全102問・全用語を改稿したわけではありません**。残る文章は従来の解説を保持しており、実例と読者からのフィードバックに基づいて同じ基準で編集する。
+**2026-10-09現在の手作業による改稿範囲：** 23講義の243セクション（直前の16講義154セクションに、テトラサイクリン・マクロライド・ニューキノロン・抗MRSA薬・ST合剤等・抗結核薬と結核補助講義の計7講義89セクションを追加）および既存19問の解説と4択の理由。**まだ全71講義・全102問・全用語を改稿したわけではありません**。残る文章は従来の解説を保持しており、実例と読者からのフィードバックに基づいて同じ基準で編集する。
 
-- `teaching-voice-editorial-a.js`、`teaching-voice-editorial-b.js`、`teaching-voice-editorial-c.js`、`teaching-voice-editorial-d.js`、`teaching-voice-editorial-e.js`、`teaching-voice-editorial-f.js`：実際に書き直した講義本文
+- `teaching-voice-editorial-a.js`、`teaching-voice-editorial-b.js`、`teaching-voice-editorial-c.js`、`teaching-voice-editorial-d.js`、`teaching-voice-editorial-e.js`、`teaching-voice-editorial-f.js`、`teaching-voice-editorial-g.js`、`teaching-voice-editorial-h.js`、`teaching-voice-editorial-i.js`：実際に書き直した講義本文
 - `teaching-voice-quiz-a.js`：19問の正答と各誤答の詳しい理由
 - 元の問い・選択肢・正答番号、講義ID、学習履歴、改行位置の仕様は維持
 
