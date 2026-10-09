@@ -330,3 +330,17 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 .drug-group-heading p{font-size:11px}
 .drug-group-count{font-size:11px}
 }
+
+
+/* Answer -> foundational lecture: explain concepts, not merely reveal the correct choice. */
+.quiz-concept-bridge{margin:19px 0 4px;border:1px solid #c7dfda;border-radius:13px;background:#f1faf7;padding:19px 21px;color:#214c4d}
+.quiz-concept-label{font-size:10px;letter-spacing:.12em;color:#0e756b;font-weight:850;margin-bottom:8px}
+.quiz-concept-bridge strong{display:block;font-size:15px;line-height:1.6}
+.quiz-concept-bridge p{font-size:12px;line-height:1.85;margin:7px 0 14px;color:#537575}
+.quiz-concept-bridge .btn{white-space:normal;text-align:left;line-height:1.65;max-width:100%}
+.reference-group .drug-group-heading h2{color:#194f62}
+.reference-group .reader-course-category{color:#2a7b87}
+@media(max-width:750px){
+ .quiz-concept-bridge{padding:16px 14px}
+ .hero .hero-content .btn{margin:6px 4px 0 0!important}
+}
