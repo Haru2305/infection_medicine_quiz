@@ -47,8 +47,16 @@
       +'<span class="reader-course-title">'+html(l.title)+'</span><span class="reader-course-description">'+html(l.subtitle)+'</span>'
       +'<span class="reader-course-footer">'+l.sections.length+' セクション <span class="reader-dot">·</span> 約'+minutes(l)+'分'
       +'<span class="reader-course-arrow" aria-hidden="true">↗</span></span></button>';
-    const chunks=showReference||!hasDrugTrack
-      ? '<section class="drug-group"><div class="drug-group-heading"><h2>'+(showReference?'感染症・病原体の補助資料':'講義一覧')+'</h2></div><div class="course-grid reader-course-grid">'+visible.map(card).join('')+'</div></section>'
+    const chunks=showReference
+      ? categories.filter(c=>visible.some(l=>l.category===c.id)).map(c=>{
+          const part=visible.filter(l=>l.category===c.id);
+          return '<section class="drug-group reference-group" data-ref-category="'+html(c.id)+'">'
+            +'<div class="drug-group-heading"><div><span class="drug-group-number">MICROBIOLOGY / FOUNDATIONS</span>'
+            +'<h2>'+html(c.name)+'</h2><p>専門用語の意味から、正常な仕組み、病態・検査まで。</p></div><span class="drug-group-count">'+part.length+' 講義</span></div>'
+            +'<div class="course-grid reader-course-grid">'+part.map(card).join('')+'</div></section>';
+        }).join('')
+      : !hasDrugTrack
+      ? '<section class="drug-group"><div class="drug-group-heading"><h2>講義一覧</h2></div><div class="course-grid reader-course-grid">'+visible.map(card).join('')+'</div></section>'
       : groups.filter(g=>current==='all'||current===g.id).map((g,i)=>{
           const part=visible.filter(l=>l.drugGroup===g.id);
           return '<section class="drug-group" data-drug-group="'+html(g.id)+'"'+(part.length?'':' hidden')+'>'
@@ -74,7 +82,7 @@
       +groups.map(g=>'<button data-action="lecture-filter" data-cat="'+html(g.id)+'" class="'+(current===g.id?'selected':'')+'" aria-pressed="'+(current===g.id)+'">'+html(g.name)+'</button>').join('')
       +'<button data-action="lecture-filter" data-cat="reference" class="'+(showReference?'selected':'')+'" aria-pressed="'+showReference+'">補助資料 ('+references.length+')</button>'
       +'</div>'
-      + (showReference?'<div class="drug-reference-notice"><strong>補助資料</strong><p>病原体・感染症・免疫などの講義はここに保管。メインの学習順序は薬剤系統別の講義です。</p></div>':'')
+      + (showReference?'<div class="drug-reference-notice"><strong>補助資料</strong><p>微生物の構造、免疫、臓器生理、疾患、検査まで、用語の定義から順番に学べます。薬剤講義と同じく、必要な前提知識は各講義の本文内で説明しています。</p></div>':'')
       +chunks
       +'<div id="lecture-no-results" class="reader-empty"'+(visible.length?' hidden':'')+'>一致する講義がありません。検索語や分野を変更してください。</div>'
       +'<p class="reader-disclaimer">医学生向け学習資料です。実際の処方は患者背景、薬剤感受性、感染部位、現行ガイドラインを踏まえて判断してください。</p>'
