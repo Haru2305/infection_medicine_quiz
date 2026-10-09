@@ -15,7 +15,7 @@ const CATEGORIES = [
 const KEYS = ['A','B','C','D'];
 const STORAGE = 'infectlab-v1';
 const app = document.getElementById('app');
-let state = {route:'home', filters:{cat:'all',level:'all',status:'all'}, session:null,lectureId:null,lectureFilter:'all'};
+let state = {route:'home', filters:{cat:'all',level:'all',status:'all'}, session:null,lectureId:null,lectureFilter:'all',lectureSearch:'',readerLarge:false};
 function loadStore(){try {const d=JSON.parse(localStorage.getItem(STORAGE)); return d&&typeof d==='object'?{records:d.records||{},bookmarks:d.bookmarks||{},lectures:d.lectures||{}}:{records:{},bookmarks:{},lectures:{}}}catch{return {records:{},bookmarks:{}}}}
 let store=loadStore();
 function persist(){try{localStorage.setItem(STORAGE,JSON.stringify(store))}catch{notify('端末への保存に失敗しました')}}
@@ -49,8 +49,8 @@ const NOTES=[
 {title:'07. よく出る原虫・寄生虫',html:'<table><tr><th>病原体</th><th>感染のヒント</th></tr><tr><td>マラリア原虫</td><td>ハマダラカ、赤血球内寄生、発熱</td></tr><tr><td>赤痢アメーバ</td><td>血性下痢・肝膿瘍</td></tr><tr><td>ジアルジア</td><td>水系感染、脂肪便・吸収不良</td></tr><tr><td>トキソプラズマ</td><td>先天感染、免疫不全で脳病変</td></tr><tr><td>クリプトスポリジウム</td><td>水系感染、免疫不全で遷延性下痢</td></tr><tr><td>糞線虫</td><td>ステロイドなどで過剰感染に注意</td></tr></table>'},
 {title:'08. 感染対策の原則',html:'<p><b>標準予防策</b>は全患者に行う。必要に応じて感染経路別予防策を追加する。</p><ul><li><b>空気</b>：結核、麻疹、水痘（接触予防策も必要）</li><li><b>飛沫</b>：百日咳、インフルエンザ（施設方針も確認）</li><li><b>接触</b>：C. difficile、疥癬など</li></ul><p>抗菌薬は「広ければ良い」ではない。検体採取・原因推定 → 初期治療 → 培養/感受性に応じた狭域化が大切。</p>'}
 ];
-function lectures(){return window.LectureUI.list({lectures:LECTURES,categories:CATEGORIES,header,completed:store.lectures||{},filter:state.lectureFilter})}
-function lecture(){return window.LectureUI.detail({lectures:LECTURES,categories:CATEGORIES,header,completed:store.lectures||{},id:state.lectureId})}
+function lectures(){return window.LectureUI.list({lectures:LECTURES,categories:CATEGORIES,header,completed:store.lectures||{},filter:state.lectureFilter,search:state.lectureSearch})}
+function lecture(){return window.LectureUI.detail({lectures:LECTURES,categories:CATEGORIES,header,completed:store.lectures||{},id:state.lectureId,largeText:state.readerLarge})}
 function notes(){return `${header('FRAMEWORK NOTES','まとめノート','暗記の前に、微生物と治療薬の全体地図を押さえよう。')}<div class="notes-grid">${NOTES.map(n=>`<article class="note"><h3>${n.title}</h3>${n.html}</article>`).join('')}</div><p class="session-note" style="margin-top:20px">※これは学習用の概略。例外、各薬剤の個別スペクトラム、耐性状況、薬物動態、患者背景によって治療は変わります。</p>`}
 function progress(){let s=stat();return `${header('LEARNING ANALYTICS','学習データ','このブラウザでの学習履歴。別端末とは自動同期しません。')}<div class="stats-grid">${metric('学習済み',s.viewed+' / '+BANK.length,'問題を少なくとも1回回答','◈')}${metric('正答率',s.rate+'%','累計 '+s.total+' 回回答','◎')}${metric('理解済み',s.mastered,'直近の回答が正解','✓')}${metric('復習待ち',s.needs,'直近の回答が不正解','↺')}</div><div class="section-head"><h2 class="section-title">分野別の進捗</h2></div><div class="panel"><div class="progress-chart">${CATEGORIES.map(c=>{let p=progressFor(c.id);return `<div class="progress-line"><span>${c.name}</span><div class="track"><span style="width:${p.pct}%"></span></div><strong>${p.n}/${p.all}</strong></div>`}).join('')}</div><div class="panel-actions"><button class="btn btn-primary btn-sm" data-action="start" data-mode="mistakes">弱点を復習 →</button><button class="btn btn-ghost btn-sm" data-action="start" data-mode="saved">ブックマークを解く</button></div><div class="settings-box"><h3>学習データの管理</h3><p>回答履歴をJSON形式でバックアップできます。削除は取り消せません。</p><div class="panel-actions"><button class="btn btn-sm btn-ghost" data-action="export">記録を書き出す</button><button class="btn btn-sm btn-ghost" data-action="import">記録を読み込む</button><button class="btn btn-sm btn-ghost" data-action="reset">学習記録を初期化</button></div><input type="file" id="import-file" accept="application/json,.json" hidden></div></div>`}
 function makeSession(questions, label,random=false){if(!questions.length){notify('対象の問題がまだありません');return}const q=random?shuffled(questions):[...questions];state.session={ids:q.map(x=>x.id),label,index:0,answers:{},correct:0};go('quiz')}
@@ -64,7 +64,38 @@ function render(){const pages={home:'ダッシュボード',library:'問題ラ�
 let timer;function notify(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(timer);timer=setTimeout(()=>t.classList.remove('show'),2800)}
 function exportStore(){const data=JSON.stringify({version:1,exportedAt:new Date().toISOString(),records:store.records,bookmarks:store.bookmarks,lectures:store.lectures||{}},null,2);const blob=new Blob([data],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='infect-lab-progress.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 function importStore(file){if(!file)return;const r=new FileReader();r.onload=()=>{try{const data=JSON.parse(r.result);if(data.version!==1||typeof data.records!=='object'||!data.records||typeof data.bookmarks!=='object'||!data.bookmarks)throw Error('形式');const ids=new Set(BANK.map(q=>q.id));const records={},bookmarks={};for(const [id,rec] of Object.entries(data.records)){if(!ids.has(id)||!rec||typeof rec!=='object')continue;const seen=Math.max(0,Number(rec.seen)||0),correct=Math.max(0,Number(rec.correct)||0),wrong=Math.max(0,Number(rec.wrong)||0);if(!Number.isFinite(seen+correct+wrong))continue;records[id]={seen:Math.min(seen,1000000),correct:Math.min(correct,seen),wrong:Math.min(wrong,seen),lastCorrect:rec.lastCorrect===true,lastAt:Number(rec.lastAt)||0}}for(const [id,value] of Object.entries(data.bookmarks)){if(ids.has(id)&&value===true)bookmarks[id]=true}if(!confirm('現在の学習記録を読み込んだ記録で上書きします。続けますか？'))return;store={records,bookmarks,lectures:Object.fromEntries(Object.entries(data.lectures||{}).filter(([id,v])=>LECTURES.some(l=>l.id===id)&&v===true))};persist();render();notify('学習記録を読み込みました')}catch{notify('読み込めないJSONファイルです')}};r.readAsText(file)}
-document.addEventListener('click',e=>{const btn=e.target.closest('[data-route],[data-action]');if(!btn)return;const route=btn.dataset.route,action=btn.dataset.action;if(route){e.preventDefault();go(route);return}if(action==='lecture-open'){state.lectureId=btn.dataset.id;go('lecture')}if(action==='lecture-filter'){state.lectureFilter=btn.dataset.cat;render()}if(action==='lecture-mark'){store.lectures=store.lectures||{};store.lectures[btn.dataset.id]=!store.lectures[btn.dataset.id];persist();render()}if(action==='category')start('category',btn.dataset.cat);if(action==='start')start(btn.dataset.mode);if(action==='single')start('single',null,btn.dataset.id);if(action==='answer')answer(Number(btn.dataset.index));if(action==='next')next();if(action==='bookmark'){const id=btn.dataset.id;store.bookmarks[id]=!store.bookmarks[id];persist();render();notify(store.bookmarks[id]?'復習リストに保存しました':'保存を解除しました')}if(action==='leave')go('home');if(action==='export')exportStore();if(action==='import')document.getElementById('import-file')?.click();if(action==='reset'&&confirm('学習記録・ブックマークをすべて削除します。取り消せません。実行しますか？')){store={records:{},bookmarks:{},lectures:{}};persist();render();notify('記録を初期化しました')}});
+document.addEventListener('click',e=>{const btn=e.target.closest('[data-route],[data-action]');if(!btn)return;const route=btn.dataset.route,action=btn.dataset.action;if(route){e.preventDefault();go(route);return}if(action==='lecture-open'){state.lectureId=btn.dataset.id;go('lecture')}if(action==='lecture-filter'){state.lectureFilter=btn.dataset.cat;render()}if(action==='reader-font'){state.readerLarge=!state.readerLarge;const reader=document.querySelector('.course-shell');if(reader)reader.classList.toggle('text-large',state.readerLarge);btn.textContent=state.readerLarge?'標準に戻す':'A+ 大きく';btn.setAttribute('aria-pressed',String(state.readerLarge));try{localStorage.setItem('infectlab-reader-large',state.readerLarge?'1':'0')}catch{}}if(action==='lecture-mark'){store.lectures=store.lectures||{};store.lectures[btn.dataset.id]=!store.lectures[btn.dataset.id];persist();render()}if(action==='category')start('category',btn.dataset.cat);if(action==='start')start(btn.dataset.mode);if(action==='single')start('single',null,btn.dataset.id);if(action==='answer')answer(Number(btn.dataset.index));if(action==='next')next();if(action==='bookmark'){const id=btn.dataset.id;store.bookmarks[id]=!store.bookmarks[id];persist();render();notify(store.bookmarks[id]?'復習リストに保存しました':'保存を解除しました')}if(action==='leave')go('home');if(action==='export')exportStore();if(action==='import')document.getElementById('import-file')?.click();if(action==='reset'&&confirm('学習記録・ブックマークをすべて削除します。取り消せません。実行しますか？')){store={records:{},bookmarks:{},lectures:{}};persist();render();notify('記録を初期化しました')}});
+document.addEventListener('input',e=>{
+ if(e.target.id!=='lecture-search')return;
+ state.lectureSearch=e.target.value;
+ const term=e.target.value.trim().toLocaleLowerCase();
+ let visible=0;
+ document.querySelectorAll('.reader-course-tile').forEach(card=>{
+  const match=(card.dataset.search||'').includes(term);
+  card.hidden=!match;
+  if(match)visible++;
+ });
+ const count=document.getElementById('lecture-match-count');
+ if(count)count.textContent=String(visible);
+ const empty=document.getElementById('lecture-no-results');
+ if(empty)empty.hidden=visible!==0;
+});
+function updateReadingProgress(){
+ if(state.route!=='lecture')return;
+ const area=document.querySelector('.reader-main');
+ const meter=document.getElementById('reader-reading-fill');
+ if(!area||!meter)return;
+ const top=area.getBoundingClientRect().top+window.scrollY;
+ const max=top+area.offsetHeight-window.innerHeight;
+ const pct=Math.min(100,Math.max(0,(window.scrollY-top)/Math.max(1,max-top)*100));
+ meter.style.width=pct+'%';
+ let active=-1;
+ document.querySelectorAll('.reader-section').forEach((sec,i)=>{
+  if(sec.getBoundingClientRect().top<Math.max(190,window.innerHeight*.27))active=i;
+ });
+ document.querySelectorAll('.reader-toc-link').forEach(link=>link.classList.toggle('is-reading',Number(link.dataset.lessonAnchor)===active));
+}
+if(window.addEventListener)window.addEventListener('scroll',updateReadingProgress,{passive:true});
 document.addEventListener('change',e=>{const ids={'filter-cat':'cat','filter-level':'level','filter-status':'status'};if(ids[e.target.id]){state.filters[ids[e.target.id]]=e.target.value;render()}if(e.target.id==='import-file')importStore(e.target.files[0])});
 document.addEventListener('keydown',e=>{if(state.route!=='quiz'||e.altKey||e.ctrlKey||e.metaKey||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;if(['1','2','3','4'].includes(e.key)){answer(Number(e.key)-1)}else if(e.key==='Enter'&&state.session){const q=BANK.find(x=>x.id===state.session.ids[state.session.index]);if(q&&state.session.answers[q.id]!==undefined)next()}});
 if(!BANK.length){app.innerHTML='<div class="empty"><strong>問題を読み込めませんでした</strong>questions.js の読み込みを確認してください。</div>'}else render();
