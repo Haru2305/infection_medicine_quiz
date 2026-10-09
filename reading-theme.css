@@ -252,3 +252,22 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 @media(prefers-reduced-motion:reduce){
  *,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
 }
+
+
+/* Tablet: preserve the full article width instead of squeezing it next to a TOC */
+.reader-font-mobile{display:none;border:1px solid #c9e0dd;background:#f1faf7;color:#197970;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer}
+@media(min-width:751px) and (max-width:1000px){
+ .reader-layout{display:block;max-width:760px;margin-left:auto;margin-right:auto}
+ .reader-sidebar{display:none}
+ .reader-mobile-toc{display:block;background:white;border:1px solid #dbe7ea;border-radius:12px;margin-top:15px}
+ .reader-mobile-toc summary{display:flex;cursor:pointer;justify-content:space-between;padding:14px 18px;font-weight:800;color:#1b5060}
+ .reader-mobile-toc nav{display:grid;padding:8px 12px 14px;border-top:1px solid #e4ecee}
+ .reader-main{max-width:100%;margin-top:28px}
+ .reader-hero{max-width:100%}
+}
+@media(max-width:1000px){.reader-font-mobile{display:inline-flex;align-items:center}}
+@media(max-width:750px){
+ .reader-font-mobile{font-size:11px;padding:5px 9px}
+ .reader-search input,.filterbar select{font-size:16px}
+ .reader-hero-meta{gap:9px}
+}
