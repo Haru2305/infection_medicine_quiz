@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1021" />
+  <meta name="description" content="細菌・ウイルス・真菌・原虫・寄生虫・抗微生物薬を、初学からCBTまで体系的に学べる感染症クイズ。" />
+  <title>INFECT LAB | 感染症を、解ける知識に。</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="questions.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="メインナビゲーション">
+      <a class="brand" href="#home" data-route="home"><span class="brand-icon">✳</span><span><strong>INFECT<span class="brand-accent">LAB</span></strong><small>MEDICAL QUIZ STUDIO</small></span></a>
+      <div class="sidebar-label">LEARNING SPACE</div>
+      <nav class="nav" id="side-nav">
+        <button class="nav-link active" data-route="home"><span class="nav-ico">⌂</span>ダッシュボード</button>
+        <button class="nav-link" data-route="library"><span class="nav-ico">▤</span>問題ライブラリ</button>
+        <button class="nav-link" data-route="notes"><span class="nav-ico">◈</span>まとめノート</button>
+        <button class="nav-link" data-route="progress"><span class="nav-ico">◴</span>学習データ</button>
+      </nav>
+      <div class="sidebar-bottom"><div class="status-dot"></div><div><strong>CBT FOUNDATION</strong><span>基礎から臨床まで、段階的に。</span></div></div>
+    </aside>
+    <div class="main-wrap">
+      <header class="topbar"><div class="crumb"><span class="crumb-light">INFECT LAB</span><span class="crumb-chevron">/</span><span id="breadcrumb">ダッシュボード</span></div><div class="header-right"><span class="mini-status"><i></i> 学習データは端末内に保存</span><div class="avatar">IL</div></div></header>
+      <main id="app" class="page" tabindex="-1" aria-live="polite"></main>
+      <footer class="footer">INFECT LAB <span>·</span> 医学生向け学習教材（臨床判断・処方の代用にはなりません）</footer>
+    </div>
+  </div>
+  <nav class="mobile-nav" aria-label="モバイルナビゲーション"><button data-route="home">⌂<small>ホーム</small></button><button data-route="library">▤<small>問題</small></button><button data-route="notes">◈<small>まとめ</small></button><button data-route="progress">◴<small>記録</small></button></nav>
+  <div id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
