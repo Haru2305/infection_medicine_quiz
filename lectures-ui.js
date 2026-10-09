@@ -46,10 +46,11 @@
       + '<button data-action="lecture-filter" data-cat="all" class="'+(filter==='all'?'selected':'')+'" aria-pressed="'+(filter==='all')+'">すべて</button>'
       + categories.map(c => '<button data-action="lecture-filter" data-cat="'+html(c.id)+'" class="'+(filter===c.id?'selected':'')+'" aria-pressed="'+(filter===c.id)+'">'+html(c.name)+'</button>').join('')
       + '</div>'
+      + (filter==='all'&&!query ? '<div class="foundation-overview"><strong>01 基礎をつくる → 02 専門講義へ</strong><p>最初の13本は、細胞・免疫・薬理・検査の「前提」。専門講義にも対応する基礎解説を追加してあるので、分からないところから戻れます。</p></div>' : '')
       + '<div class="reader-library-label"><h2>講義一覧</h2><p>短い章に分けてあるので、途中からでも読み進められます。</p></div>'
       + '<div class="course-grid reader-course-grid">'
       + visible.map(l => '<button class="course-tile reader-course-tile" data-action="lecture-open" data-id="'+html(l.id)+'" data-search="'+html([l.title,l.subtitle,...l.sections.map(s=>s.title)].join(' ').toLocaleLowerCase())+'">'
-        + '<span class="reader-course-top"><span class="reader-course-icon">'+(glyph[l.category] || '◈')+'</span><span class="reader-course-category">'+html(catName(l.category,categories))+'</span>'
+        + '<span class="reader-course-top"><span class="reader-course-icon">'+(glyph[l.category] || '◈')+'</span><span class="reader-course-category">'+(l.level==='foundation'?'基礎の基礎':'専門 · '+html(catName(l.category,categories)))+'</span>'
         + (completed[l.id] ? '<span class="reader-done">✓ 読了</span>' : '')+'</span>'
         + '<span class="reader-course-title">'+html(l.title)+'</span>'
         + '<span class="reader-course-description">'+html(l.subtitle)+'</span>'
@@ -69,7 +70,7 @@
     const chapters = l.sections.map((sec, i) => {
       const ps = paragraphs(sec.body);
       return '<section class="reader-section" id="lesson-section-'+i+'">'
-        + '<div class="reader-section-label"><span class="reader-section-marker">'+String(i+1).padStart(2,'0')+'</span>SECTION '+String(i+1).padStart(2,'0')+' / '+String(l.sections.length).padStart(2,'0')+'</div>'
+        + '<div class="reader-section-label"><span class="reader-section-marker">'+String(i+1).padStart(2,'0')+'</span>'+(sec.title.startsWith('ゼロから｜')||sec.title.startsWith('なぜ？｜')?'PREREQUISITE / ': 'SECTION ')+String(i+1).padStart(2,'0')+' / '+String(l.sections.length).padStart(2,'0')+'</div>'
         + '<h2>'+html(sec.title)+'</h2>'
         + (ps.lead ? '<div class="reader-lead"><span class="reader-lead-label">まず押さえる</span><p>'+html(ps.lead)+'</p></div>' : '')
         + '<div class="reader-prose">'+ps.body.map(p=>'<p>'+html(p)+'</p>').join('')+'</div>'
@@ -85,6 +86,7 @@
       + '<h1>'+html(l.title)+'</h1><p>'+html(l.subtitle)+'</p>'
       + '<div class="reader-hero-meta"><span>◷ 約'+minutes(l)+'分</span><span>▤ '+l.sections.length+'セクション</span>'
       + (done?'<span class="reader-hero-done">✓ 読了済み</span>':'<span>基礎から順番に学ぶ</span>')+'<button class="reader-font-mobile" data-action="reader-font" aria-pressed="'+largeText+'" aria-label="文字を大きくする">'+(largeText?'標準に戻す':'A+ 文字拡大')+'</button></div></header>'
+      + ((l.prereqs||[]).length ? '<div class="prerequisite-map"><div class="prereq-overline">BEFORE YOU START · この講義の土台</div><h2>ここが分からなければ、先に戻れる。</h2><p>専門用語を飛ばさず、必要な細胞生物学・免疫学・薬理学から読み直せます。</p><div class="prereq-links">'+l.prereqs.map(pid=>{const p=lectures.find(x=>x.id===pid);return p?'<button class="prereq-link" data-action="lecture-open" data-id="'+html(p.id)+'"><span>基礎の基礎</span><strong>'+html(p.title)+'</strong><span aria-hidden="true">↗</span></button>':''}).join('')+'</div></div>' : '')
       + '<details class="reader-mobile-toc"><summary>章の目次を開く <span>'+l.sections.length+' セクション</span></summary><nav aria-label="この講義の章一覧">'+items+'</nav></details>'
       + '<div class="reader-layout"><aside class="reader-sidebar"><div class="reader-sidebar-card">'
       + '<div class="reader-side-label">ON THIS PAGE</div><div class="reader-sidebar-heading">この講義の目次</div><nav class="reader-toc" aria-label="この講義の章一覧">'+items+'</nav>'
@@ -95,7 +97,7 @@
       + '<section class="reader-finish" id="lecture-finish"><div class="reader-finish-symbol">✓</div><span>LECTURE COMPLETE</span>'
       + '<h2>ここまで読んだら、問題で確認。</h2><p>覚えるだけでなく、仕組みを自分の言葉で説明できるかがポイント。読了記録はいつでも取り消せます。</p>'
       + '<div class="reader-finish-actions"><button class="btn btn-primary" data-action="lecture-mark" data-id="'+html(l.id)+'">'+(done?'✓ 読了済みを解除':'✓ この講義を読了にする')+'</button>'
-      + '<button class="btn btn-primary" data-action="lecture-quiz" data-id="'+html(l.id)+'">この講義の確認テスト（'+(l.questionIds||[]).length+'問） →</button>'
+      + ((l.questionIds||[]).length ? '<button class="btn btn-primary" data-action="lecture-quiz" data-id="'+html(l.id)+'">この講義の確認テスト（'+l.questionIds.length+'問） →</button>':'')
       + '<button class="btn btn-ghost" data-action="category" data-cat="'+html(l.category)+'">この分野の4択問題へ →</button></div></section>'
       + '<div class="reader-neighbors"><div>'+(prev?'<button class="reader-neighbor" data-action="lecture-open" data-id="'+html(prev.id)+'"><span>← 前の講義</span><strong>'+html(prev.title)+'</strong></button>':'')+'</div>'
       + '<div>'+(next?'<button class="reader-neighbor" data-action="lecture-open" data-id="'+html(next.id)+'"><span>次の講義 →</span><strong>'+html(next.title)+'</strong></button>':'')+'</div></div>'
