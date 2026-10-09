@@ -395,7 +395,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 .inline-term-next{padding-top:10px}
 .inline-term-next>strong{display:block;font-size:12px;margin-bottom:9px}
 .inline-term-related-item{margin:6px 0}
-.inline-term-related-button{border:1px solid #cfdcdc;border-radius:8px;color:#33585c;background:transparent;padding:7px 11px;font:700 12px/1.6 inherit;cursor:pointer;text-align:left}
+.inline-term-related-button{border:1px solid #cfdcdc;border-radius:8px;color:#33585c;background:transparent;padding:7px 11px;font-size:12px;font-family:inherit;font-weight:700;line-height:1.6;cursor:pointer;text-align:left}
 .inline-term-related-button:hover{background:#f0f6f5;border-color:#a8c6c2}
 .inline-term-related-button[aria-expanded="true"]{background:#eef6f5}
 .inline-term-related-content{padding:10px 0 10px 13px;margin-top:7px;border-left:2px solid #d9e7e5}
