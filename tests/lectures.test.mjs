@@ -460,7 +460,7 @@ test('meaning-based paragraph breaks only occur at selected sections without cha
 test('lecture HTML uses curated paragraphs while preserving inline term definitions',()=>{
   const app=launch(),lessons=app.window.INFECT_LECTURES;
   const l=lessons.find(x=>x.id==='L05');
-  assert.match(l.sections[7].body,/第3世代：/);
+  assert.match(l.sections[7].body,/第3世代セフトリアキソン/);
   const html=app.window.LectureUI.detail({lectures:lessons,categories:[],completed:{},id:l.id});
   const section=html.slice(html.indexOf('id="lesson-section-7"'),html.indexOf('id="lesson-section-8"'));
   assert.ok((section.match(/<p>/g)||[]).length>=3,'drug-generation comparisons need readable paragraphs');
