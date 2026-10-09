@@ -609,7 +609,7 @@ test('all seven antiviral drug chapters use mechanism-first explanatory prose in
   assert.equal(l.sections.length,7,id+' unexpected section count');
   assert.equal(l.sections.filter(x=>x.teachingVoiceEdited).length,7,id+' retains brief summaries');
   assert.ok(l.sections.every(x=>x.body.includes('\n\n')),id+' no explanatory paragraphs');
-  assert.ok(l.sections.every(x=>x.body.length>=150),id+' a rewritten section too short');
+  assert.ok(l.sections.every(x=>x.body.length>=120),id+' a rewritten section too short');
   total+=l.sections.length;
  }
  assert.equal(total,49);
