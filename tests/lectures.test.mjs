@@ -8,13 +8,13 @@ import path from 'node:path';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=name=>readFileSync(path.join(root,name),'utf8');
 const scripts=[
-  'questions.js','lectures.js','foundation-roots.js','foundation-bridges-a.js',
+  'questions.js','explained-questions-a.js','explained-questions-b.js','explained-questions-c.js','explained-questions-d.js','explained-questions-e.js','explained-questions-clarify.js','explained-questions-init.js','lectures.js','foundation-roots.js','foundation-bridges-a.js',
   'foundation-bridges-b.js','curriculum-init.js','antibiotic-depth-a.js',
   'antibiotic-depth-b.js','drug-antiviral.js','drug-antifungal.js',
   'drug-antiparasitic.js','antibiotic-course.js','non-drug-depth-a.js',
   'non-drug-depth-b.js','non-drug-course.js','non-drug-gaps.js',
   'question-concept-links.js','first-principles-concepts.js',
-  'in-lesson-concepts.js','inline-depth-placement.js','semantic-paragraphs.js','inline-terms-base.js',
+  'in-lesson-concepts.js','inline-depth-placement.js','semantic-paragraphs.js','explained-lectures-a.js','explained-lectures-b.js','explained-lectures-c.js','explained-lectures-d.js','explained-lectures-init.js','inline-terms-base.js',
   'inline-terms-mechanisms.js','inline-terms-clinical.js','inline-terms-clarify.js','inline-terms-pathogens.js','inline-terms-molecular-gaps.js','inline-terms.js',
   'lectures-ui.js','app.js'
 ];
@@ -466,4 +466,50 @@ test('lecture HTML uses curated paragraphs while preserving inline term definiti
   assert.ok((section.match(/<p>/g)||[]).length>=3,'drug-generation comparisons need readable paragraphs');
   assert.ok(html.includes('data-action="term-toggle"'),'in-paragraph definitions must remain available');
   assert.equal(app.window.QUESTION_BANK.length,102);
+});
+
+test('all 102 CBT questions contain authored explanations for every correct and incorrect option',()=>{
+  const app=launch(),qs=app.window.QUESTION_BANK;
+  assert.equal(qs.length,102);
+  assert.equal(app.window.INFECT_NARRATIVE_QUESTION_COVERAGE,102);
+  assert.ok(qs.every(q=>q.explanation.length>=110&&q.explanation.includes('。')));
+  assert.ok(qs.every(q=>q.explanation.includes('\\n\\n')),'all questions have intentional paragraph boundaries');
+  assert.ok(qs.every(q=>q.reasons.length===4&&q.reasons.every(r=>r.length>=17)));
+  assert.ok(qs.every(q=>q.answer>=0&&q.answer<4));
+  const f=qs.find(q=>q.id==='F001');
+  assert.match(f.explanation,/ウイルスは遺伝情報を包んだ感染性粒子/);
+  assert.match(f.reasons[3],/RNA型/);
+  const a=qs.find(q=>q.id==='A009');
+  assert.match(a.explanation,/膜電位/);
+  const m=qs.find(q=>q.id==='M007');
+  assert.match(m.explanation,/グルカン/);
+});
+
+test('71 lectures have context-specific long-form normal-to-abnormal explanations in their actual topic section',()=>{
+  const app=launch(),lectures=app.window.INFECT_LECTURES;
+  assert.equal(app.window.INFECT_TUTOR_LECTURE_COVERAGE,71);
+  assert.equal(lectures.length,71);
+  for(const l of lectures){
+    assert.equal(l.sections[0].tutorEdited,true,l.id+' has not been rewritten');
+    const body=l.sections[0].body;
+    assert.ok(body.length>=290,l.id+' has no substantial tutor explanation');
+    assert.ok(body.split(/\\n\\s*\\n/).length>=3,l.id+' lacks semantic paragraphs');
+  }
+  const checks={L07:'リボソーム',RXV01:'神経節',RXF01:'エルゴステロール',RXH01:'Clチャネル',L27:'肺胞',L29:'臓器障害'};
+  for(const [id,term] of Object.entries(checks)){
+    const lesson=lectures.find(l=>l.id===id);
+    assert.ok(lesson.sections[0].body.includes(term),id+' missing topic context');
+  }
+  assert.equal(lectures.filter(x=>x.curriculumTrack==='drugs').length,29);
+  assert.equal(lectures.filter(x=>x.curriculumTrack==='reference').length,42);
+});
+test('quiz answers render explanatory prose as multiple real paragraphs, without automatic sentence splitting',()=>{
+  const app=launch();
+  app.click({route:'library'});
+  app.click({action:'single',id:'F001'});
+  app.click({action:'answer',index:'2'});
+  assert.ok((app.html.match(/class="explain-intro"/g)||[]).length>=2,'explanations must retain authored paragraph breaks');
+  assert.match(app.html,/原核生物/);
+  assert.match(app.html,/RNA型/);
+  assert.match(app.html,/CHECK POINT/);
 });
