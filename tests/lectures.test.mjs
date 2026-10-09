@@ -473,7 +473,7 @@ test('all 102 CBT questions contain authored explanations for every correct and 
   assert.equal(qs.length,102);
   assert.equal(app.window.INFECT_NARRATIVE_QUESTION_COVERAGE,102);
   assert.ok(qs.every(q=>q.explanation.length>=110&&q.explanation.includes('。')));
-  assert.ok(qs.every(q=>q.explanation.includes('\\n\\n')),'all questions have intentional paragraph boundaries');
+  assert.ok(qs.every(q=>q.explanation.includes('\n\n')),'all questions have intentional paragraph boundaries');
   assert.ok(qs.every(q=>q.reasons.length===4&&q.reasons.every(r=>r.length>=17)));
   assert.ok(qs.every(q=>q.answer>=0&&q.answer<4));
   const f=qs.find(q=>q.id==='F001');
@@ -493,7 +493,7 @@ test('71 lectures have context-specific long-form normal-to-abnormal explanation
     assert.equal(l.sections[0].tutorEdited,true,l.id+' has not been rewritten');
     const body=l.sections[0].body;
     assert.ok(body.length>=290,l.id+' has no substantial tutor explanation');
-    assert.ok(body.split(/\\n\\s*\\n/).length>=3,l.id+' lacks semantic paragraphs');
+    assert.ok(body.split(/\n\s*\n/).length>=3,l.id+' lacks semantic paragraphs');
   }
   const checks={L07:'リボソーム',RXV01:'神経節',RXF01:'エルゴステロール',RXH01:'Clチャネル',L27:'肺胞',L29:'臓器障害'};
   for(const [id,term] of Object.entries(checks)){
