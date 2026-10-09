@@ -96,7 +96,21 @@
     const groupLessons=pool.length?pool:lectures;
     const idx = groupLessons.indexOf(l), prev = groupLessons[idx - 1], next = groupLessons[idx + 1];
     const done = Boolean(completed[l.id]);
-    const items = l.sections.map((s,i) => '<a href="#lesson-section-'+i+'" class="reader-toc-link" data-lesson-anchor="'+i+'"><span class="reader-toc-number">'+String(i+1).padStart(2,'0')+'</span><span>'+html(s.title)+'</span></a>').join('');
+    const conceptCards=(l.primitiveKeys||[]).map(key=>window.INFECT_CONCEPT_BY_ID?.[key]).filter(Boolean);
+    const conceptPanel=conceptCards.length?'<section class="primitive-panel" id="lesson-first-principles">'
+      +'<div class="primitive-kicker">STEP 0 / FIRST PRINCIPLES</div>'
+      +'<h2>そもそも、何の話なのか？</h2>'
+      +'<p class="primitive-intro">この講義の前提を、用語の定義よりさらに下から。<strong>正常な仕組み → 異常で何が変わる？ → QBで何を判断する？</strong>の順に読み解く。最初の項目は開いてあります。</p>'
+      +'<div class="primitive-grid">'+conceptCards.map((c,i)=>'<details class="primitive-card"'+(i===0?' open':'')+'>'
+        +'<summary><span class="primitive-card-index">'+String(i+1).padStart(2,'0')+'</span><span>'+html(c.title)+'</span><span class="primitive-toggle" aria-hidden="true">⌄</span></summary>'
+        +'<div class="primitive-content">'
+        +'<div class="primitive-step"><strong>① そもそも何？</strong><p>'+html(c.zero)+'</p></div>'
+        +'<div class="primitive-step"><strong>② 正常時はどうなっている？</strong><p>'+html(c.normal)+'</p></div>'
+        +'<div class="primitive-step"><strong>③ 異常が起きると何が変わる？</strong><p>'+html(c.abnormal)+'</p></div>'
+        +'<div class="primitive-step"><strong>④ だからQBではここを考える</strong><p>'+html(c.qb)+'</p></div>'
+        +'</div></details>').join('')+'</div></section>':'';
+    const items = (conceptCards.length?'<a href="#lesson-first-principles" class="reader-toc-link"><span class="reader-toc-number">00</span><span>まず、言葉の土台から</span></a>':'')
+      + l.sections.map((s,i) => '<a href="#lesson-section-'+i+'" class="reader-toc-link" data-lesson-anchor="'+i+'"><span class="reader-toc-number">'+String(i+1).padStart(2,'0')+'</span><span>'+html(s.title)+'</span></a>').join('');
     const chapters = l.sections.map((sec, i) => {
       const ps = paragraphs(sec.body);
       return '<section class="reader-section" id="lesson-section-'+i+'">'
@@ -121,7 +135,7 @@
       + '<div class="reader-layout"><aside class="reader-sidebar"><div class="reader-sidebar-card">'
       + '<div class="reader-side-label">ON THIS PAGE</div><div class="reader-sidebar-heading">この講義の目次</div><nav class="reader-toc" aria-label="この講義の章一覧">'+items+'</nav>'
       + '<div class="reader-side-footer"><span>文字の大きさ</span><button data-action="reader-font" aria-pressed="'+largeText+'" aria-label="文字を大きくする">'+(largeText?'標準に戻す':'A+ 大きく')+'</button></div></div></aside>'
-      + '<div class="reader-main"><div class="reader-goals"><span>この講義で学ぶこと</span><ul>'
+      + '<div class="reader-main">'+conceptPanel+'<div class="reader-goals"><span>この講義で学ぶこと</span><ul>'
       + l.sections.slice(0,3).map(sec=>'<li>'+html(sec.title)+'</li>').join('')+'</ul></div>'
       + chapters
       + '<section class="reader-finish" id="lecture-finish"><div class="reader-finish-symbol">✓</div><span>LECTURE COMPLETE</span>'
