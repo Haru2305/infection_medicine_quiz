@@ -157,8 +157,8 @@ test('all displayed lesson metadata is escaped and paragraphs render safely',()=
   assert.ok(!output.includes('<img src=x'));
   assert.ok(!output.includes('<b>unsafe</b>'));
   const paras=app.window.LectureUI.paragraphs('背景。要点その1。要点その2。もうひとつ。');
-  assert.equal(paras.lead,'背景。');
-  assert.equal(paras.body.length,2);
+  assert.equal(paras.lead,'');
+  assert.deepEqual(Array.from(paras.body),['背景。要点その1。要点その2。もうひとつ。']);
 });
 
 test('script dependencies and responsive reader styles load in correct order',()=>{
@@ -263,8 +263,11 @@ test('in-place explanations work for non-drug infections and for quiz choices an
     assert.match(view,/data-action="term-toggle"/);
     for(const term of words)assert.ok(view.includes(term),id+' missing '+term);
   }
+  const explainable=app.window.QUESTION_BANK.find(q=>[q.question,q.explanation,q.point,...q.reasons]
+    .some(str=>app.window.InlineTerms.render(str).includes('data-action="term-toggle"')));
+  assert.ok(explainable,'at least one quiz includes terms with inline explanations');
   app.click({route:'library'});
-  app.click({action:'start',mode:'random10'});
+  app.click({action:'single',id:explainable.id});
   app.click({action:'answer',index:'0'});
   assert.match(app.html,/CHECK POINT/);
   assert.match(app.html,/data-action="term-toggle"/);
@@ -381,4 +384,34 @@ test('new glossary definitions escape HTML safely and do not create clickable ne
   app.click({action:'start',mode:'random10'});
   assert.match(app.html,/class="option/);
   assert.match(app.html,/class="choice-row"/);
+});
+
+test('paragraphs preserve author-chosen breaks instead of inventing sentence-based paragraphs',()=>{
+  const app=launch(),format=app.window.LectureUI.paragraphs;
+  const one='細菌の構造。薬の作用！なぜだろう？ここまで同じ段落。';
+  assert.equal(format(one).lead,'');
+  assert.equal(format(one).body.length,1);
+  assert.equal(format(one).body[0],one);
+  const multi='最初の段落。一文目と二文目。\n\n次の段落。検査所見まで。\n\n最後は治療。';
+  assert.deepEqual([...format(multi).body],[
+    '最初の段落。一文目と二文目。',
+    '次の段落。検査所見まで。',
+    '最後は治療。'
+  ]);
+  const windows='前半。\r\n \r\n後半。\r\n\r\n\r\n最後。';
+  assert.deepEqual([...format(windows).body],['前半。','後半。','最後。']);
+  assert.deepEqual([...format('  \n\n  ').body],[]);
+});
+
+test('lecture paragraphs render without arbitrary lead text or mid-sentence divisions',()=>{
+  const app=launch(),html=app.window.LectureUI.detail({
+    lectures:[{id:'demo',title:'改行検証',subtitle:'段落の検証',category:'basics',sections:[
+      {title:'普通の本文',body:'先行文。続く文。\n\n次の段落。さらに続く文。'}
+    ]}],
+    categories:[],completed:{},id:'demo'
+  });
+  assert.ok(html.includes('<div class="reader-prose"><p>先行文。続く文。</p><p>次の段落。さらに続く文。</p></div>'));
+  assert.ok(!html.includes('class="reader-lead"'));
+  assert.ok(!html.includes('<p>先行文。</p>'));
+  assert.match(html,/reader-section-end/);
 });

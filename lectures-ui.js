@@ -5,19 +5,15 @@
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
   })[char]);
   const catName = (id, cats) => cats.find(c => c.id === id)?.name || id;
-  const byLine = value => String(value || '').split(/\n{2,}/).map(s => s.trim()).filter(Boolean);
-  function sentences(text) {
-    // Only reflow the author's existing Japanese prose; never create new medical facts.
-    return (String(text).match(/[^。！？\n]+[。！？]?/g) || []).map(s => s.trim()).filter(Boolean);
-  }
+  // Respect author-defined paragraphs. Never split prose at Japanese punctuation,
+  // and never recombine sentences from different source paragraphs.
+  const byLine = value => String(value ?? '')
+    .replace(/\r\n?/g, '\n')
+    .split(/\n[ \t]*\n+/)
+    .map(block => block.trim())
+    .filter(Boolean);
   function paragraphs(text) {
-    const blocks = byLine(text);
-    const lines = blocks.flatMap(b => sentences(b));
-    if (!lines.length) return { lead: '', body: [] };
-    const lead = lines.shift();
-    const body = [];
-    for (let i = 0; i < lines.length; i += 2) body.push(lines.slice(i, i + 2).join(''));
-    return { lead, body };
+    return { lead: '', body: byLine(text) };
   }
   function minutes(lesson) {
     const len = lesson.sections.reduce((n, s) => n + s.body.length, 0);
@@ -103,7 +99,6 @@
       return '<section class="reader-section" id="lesson-section-'+i+'">'
         + '<div class="reader-section-label"><span class="reader-section-marker">'+String(i+1).padStart(2,'0')+'</span>'+(sec.title.startsWith('ゼロから｜')||sec.title.startsWith('なぜ？｜')?'PREREQUISITE / ': 'SECTION ')+String(i+1).padStart(2,'0')+' / '+String(l.sections.length).padStart(2,'0')+'</div>'
         + '<h2>'+html(sec.title)+'</h2>'
-        + (ps.lead ? '<div class="reader-lead"><span class="reader-lead-label">ここから理解</span><p>'+annotated(ps.lead)+'</p></div>' : '')
         + '<div class="reader-prose">'+ps.body.map(p=>'<p>'+annotated(p)+'</p>').join('')+'</div>'
         + '<div class="reader-section-end"><span>SECTION '+String(i+1).padStart(2,'0')+' END</span>'
         + (i+1<l.sections.length ? '<a href="#lesson-section-'+(i+1)+'">次のセクションへ ↓</a>' : '<a href="#lecture-finish">講義のまとめへ ↓</a>')+'</div>'
