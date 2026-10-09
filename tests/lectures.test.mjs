@@ -158,7 +158,7 @@ test('all displayed lesson metadata is escaped and paragraphs render safely',()=
   assert.ok(!output.includes('<b>unsafe</b>'));
   const paras=app.window.LectureUI.paragraphs('背景。要点その1。要点その2。もうひとつ。');
   assert.equal(paras.lead,'');
-  assert.deepEqual(paras.body,['背景。要点その1。要点その2。もうひとつ。']);
+  assert.deepEqual(Array.from(paras.body),['背景。要点その1。要点その2。もうひとつ。']);
 });
 
 test('script dependencies and responsive reader styles load in correct order',()=>{
