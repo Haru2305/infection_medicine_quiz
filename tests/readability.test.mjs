@@ -63,7 +63,7 @@ test('long-form lecture keeps natural paragraphs without arbitrary lead breaks',
  assert.equal(result.lead,'');
  assert.equal(result.body.length,1);
  assert.equal(result.body[0],'第一文。第二文。第三文。第四文。');
- const authored=f.window.LectureUI.paragraphs('第1段落。続く文。\\n\\n第2段落。');
+ const authored=f.window.LectureUI.paragraphs('第1段落。続く文。\n\n第2段落。');
  assert.equal(authored.body.length,2);
  assert.equal(authored.body[0],'第1段落。続く文。');
  assert.equal(authored.body[1],'第2段落。');
