@@ -5,164 +5,166 @@ import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const read = filename => readFileSync(path.join(root, filename), 'utf8');
-
-function launch() {
-  let html = '';
-  let breadcrumb = '';
-  const storage = new Map();
-  const app = { set innerHTML(value) { html = value; }, get innerHTML() { return html; } };
-  const document = {
-    listeners: new Map(),
-    getElementById(id) {
-      if (id === 'app') return app;
-      if (id === 'breadcrumb') return { set textContent(value) { breadcrumb = value; } };
-      if (id === 'toast') return { textContent: '', classList: { add() {}, remove() {} } };
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const read=name=>readFileSync(path.join(root,name),'utf8');
+const scripts=[
+  'questions.js','lectures.js','foundation-roots.js','foundation-bridges-a.js',
+  'foundation-bridges-b.js','curriculum-init.js','antibiotic-depth-a.js',
+  'antibiotic-depth-b.js','drug-antiviral.js','drug-antifungal.js',
+  'drug-antiparasitic.js','antibiotic-course.js','lectures-ui.js','app.js'
+];
+function launch(){
+  let html='',breadcrumb='';
+  const storage=new Map();
+  const app={set innerHTML(value){html=value},get innerHTML(){return html}};
+  const document={
+    listeners:new Map(),
+    getElementById(id){
+      if(id==='app')return app;
+      if(id==='breadcrumb')return{set textContent(value){breadcrumb=value}};
+      if(id==='toast')return{set textContent(value){},classList:{add(){},remove(){}}};
       return null;
     },
-    querySelectorAll() { return []; },
-    addEventListener(type, fn) { this.listeners.set(type, fn); }
+    querySelectorAll(){return []},
+    addEventListener(type,fn){this.listeners.set(type,fn)}
   };
-  const window = { scrollTo() {} };
-  const localStorage = { getItem: key => storage.get(key) || null, setItem: (key,value) => storage.set(key,value) };
-  const context = vm.createContext({ window, document, localStorage, setTimeout: () => 0, clearTimeout() {}, confirm: () => true, console });
-  for (const name of ['questions.js', 'lectures.js', 'foundation-roots.js', 'foundation-bridges-a.js', 'foundation-bridges-b.js', 'curriculum-init.js', 'lectures-ui.js', 'app.js']) {
-    vm.runInContext(read(name), context, { filename: name });
-  }
+  const window={scrollTo(){}};
+  const localStorage={
+    getItem:key=>storage.get(key)||null,
+    setItem:(key,value)=>storage.set(key,value)
+  };
+  const context=vm.createContext({window,document,localStorage,setTimeout:()=>0,clearTimeout(){},confirm:()=>true,console});
+  for(const name of scripts)vm.runInContext(read(name),context,{filename:name});
   return {
-    window, storage,
-    get html() { return html; },
-    get breadcrumb() { return breadcrumb; },
-    click(dataset) {
-      document.listeners.get('click')({ target: { closest: () => ({ dataset }) }, preventDefault() {} });
+    window,storage,
+    get html(){return html},get breadcrumb(){return breadcrumb},
+    click(dataset){
+      document.listeners.get('click')({target:{closest:()=>({dataset})},preventDefault(){}});
     }
   };
 }
 
-test('deep lectures cover all eight infection disciplines', () => {
-  const app = launch();
-  const lessons = app.window.INFECT_LECTURES;
-  assert.equal(lessons.length, 52); // 39 existing specialist lessons + 13 new foundation modules
-  assert.equal(new Set(lessons.map(l => l.category)).size, 8);
-  assert.equal(new Set(lessons.map(l => l.id)).size, lessons.length);
-  assert.ok(lessons.every(l => l.sections.length >= 6));
-  assert.equal(lessons.filter(l => l.level === 'foundation').length, 13);
-  assert.equal(lessons.filter(l => l.level !== 'foundation').length, 39);
-  assert.ok(lessons.filter(l => l.id.startsWith('L')).every(l => l.sections.length >= 10 && l.prereqs.length >= 2));
-  assert.ok(lessons.every(l => l.sections.every(s => s.title && s.body.length > 30)));
+test('all medicine classes are main chapters; foundational and infectious disease reference chapters are supplementary',()=>{
+  const app=launch(),all=app.window.INFECT_LECTURES;
+  const main=all.filter(l=>l.curriculumTrack==='drugs'),refs=all.filter(l=>l.curriculumTrack==='reference');
+  assert.equal(main.length,29);
+  assert.equal(refs.length,42);
+  assert.equal(all.length,71);
+  assert.equal(new Set(all.map(l=>l.id)).size,all.length);
+  assert.equal(refs.filter(l=>l.level==='foundation').length,13);
+  const counts=Object.fromEntries(app.window.INFECT_DRUG_GROUPS.map(g=>[g.id,main.filter(l=>l.drugGroup===g.id).length]));
+  assert.equal(JSON.stringify(counts),JSON.stringify({antibacterial:11,antiviral:7,antifungal:5,antiprotozoal:3,antihelminthic:3}));
+  assert.ok(all.every(l=>l.sections.length>=6&&l.sections.every(s=>s.title&&s.body.length>30)));
 });
 
-test('navigation and reading completion work without breaking quizzes', () => {
-  const app = launch();
-  assert.match(app.html, /感染症を/);
-  app.click({ route: 'lectures' });
-  assert.match(app.html, /アミノグリコシド/);
-  app.click({ action: 'lecture-open', id: 'L07' });
-  assert.match(app.html, /mRNA/);
-  assert.match(app.html, /嫌気性菌/);
-  app.click({ action: 'lecture-mark', id: 'L07' });
-  assert.equal(JSON.parse(app.storage.get('infectlab-v1')).lectures.L07, true);
-  app.click({ route: 'library' });
-  assert.match(app.html, /問題ライブラリ/);
-  app.click({ action: 'start', mode: 'random10' });
-  assert.match(app.html, /1 \/ 10/);
-  app.click({ action: 'answer', index: '0' });
-  assert.match(app.html, /CHECK POINT/);
+test('each drug course contains its own background biology and deep pharmacology',()=>{
+  const all=launch().window.INFECT_LECTURES;
+  const byId=Object.fromEntries(all.map(l=>[l.id,l]));
+  assert.ok(byId.L07.sections.some(s=>s.body.includes('30S')&&s.body.includes('50S')));
+  assert.ok(byId.L07.sections.some(s=>s.body.includes('膜電位')&&s.body.includes('嫌気性菌')));
+  assert.ok(byId.L04.sections.some(s=>s.body.includes('ペプチドグリカン')&&s.body.includes('PBP')));
+  assert.ok(byId.RXV01.sections.some(s=>s.body.includes('チミジンキナーゼ')));
+  assert.ok(byId.RXV04.sections.some(s=>s.body.includes('逆転写酵素')));
+  assert.ok(byId.RXF01.sections.some(s=>s.body.includes('CYP51')));
+  assert.ok(byId.RXF02.sections.some(s=>s.body.includes('グルカン')));
+  assert.ok(byId.RXP00.sections.some(s=>s.body.includes('G6PD')));
+  assert.ok(byId.RXH01.sections.some(s=>s.body.includes('Clチャネル')));
+  assert.ok(byId.RXH02.sections.some(s=>s.body.includes('Ca2+')));
 });
 
-test('lecture display escapes user-facing content', () => {
-  const app = launch();
-  const x = app.window.LectureUI.list({
-    lectures: [{ id: 'x" onclick="evil()', title: '<script>alert(1)</script>', subtitle: '', category: 'basics', sections: [{ title: 'x', body: 'text' }] }],
-    categories: [{ id: 'basics', name: '基礎' }],
-    header: () => '',
-    completed: {},
-    filter: 'all'
+test('drug chapters connect only to existing 4-choice quiz question IDs',()=>{
+  const app=launch();
+  const ids=new Set(app.window.QUESTION_BANK.map(q=>q.id));
+  for(const l of app.window.INFECT_LECTURES.filter(x=>x.curriculumTrack==='drugs')){
+    assert.ok((l.questionIds||[]).every(id=>ids.has(id)),l.id+' has invalid quiz ID');
+    assert.ok((l.questionIds||[]).length>=1,l.id+' lacks linked practice');
+  }
+  assert.equal(app.window.QUESTION_BANK.length,102);
+});
+
+test('library primarily lists medicines and keeps reference chapters out of main view',()=>{
+  const app=launch();
+  assert.match(app.html,/感染症の薬を/);
+  app.click({route:'lectures'});
+  assert.match(app.html,/感染症の薬を/);
+  assert.match(app.html,/すべての薬 \(29\)/);
+  for(const name of ['抗細菌薬','抗ウイルス薬','抗真菌薬','抗原虫薬','駆虫薬'])assert.match(app.html,new RegExp(name));
+  assert.match(app.html,/アミノグリコシド系/);
+  assert.match(app.html,/アシクロビル/);
+  assert.match(app.html,/イベルメクチン/);
+  assert.doesNotMatch(app.html,/DNA→RNA→タンパク質を完全理解/);
+  assert.match(app.html,/補助資料 \(42\)/);
+  app.click({action:'lecture-filter',cat:'reference'});
+  assert.match(app.html,/DNA→RNA→タンパク質を完全理解/);
+});
+
+test('opening drug lessons presents inline deep physiology, not a mandatory prerequisite link',()=>{
+  const app=launch();
+  app.click({action:'lecture-open',id:'L07'});
+  assert.match(app.html,/70Sリボソームを数字から理解/);
+  assert.match(app.html,/膜電位/);
+  assert.match(app.html,/reader-mobile-toc/);
+  assert.match(app.html,/reader-reading-fill/);
+  assert.doesNotMatch(app.html,/BEFORE YOU START/);
+  app.click({action:'lecture-open',id:'RXV01'});
+  assert.match(app.html,/DNAポリメラーゼ/);
+  assert.match(app.html,/チミジンキナーゼ/);
+  app.click({action:'lecture-open',id:'RXF03'});
+  assert.match(app.html,/エルゴステロール/);
+});
+
+test('lecture read state and existing quiz session remain intact',()=>{
+  const app=launch();
+  app.click({action:'lecture-open',id:'RXP00'});
+  app.click({action:'lecture-mark',id:'RXP00'});
+  assert.equal(JSON.parse(app.storage.get('infectlab-v1')).lectures.RXP00,true);
+  app.click({route:'library'});
+  assert.match(app.html,/問題ライブラリ/);
+  app.click({action:'start',mode:'random10'});
+  assert.match(app.html,/1 \/ 10/);
+  app.click({action:'answer',index:'0'});
+  assert.match(app.html,/CHECK POINT/);
+});
+
+test('medicine specific filters and search do not expose unrelated chapters',()=>{
+  const app=launch(),ui=app.window.LectureUI,all=app.window.INFECT_LECTURES;
+  const result=ui.list({lectures:all,categories:[],completed:{},filter:'antiviral',search:'アシクロビル'});
+  assert.match(result,/アシクロビル/);
+  assert.match(result,/reader-course-grid/);
+  assert.doesNotMatch(result,/イベルメクチン/);
+  assert.doesNotMatch(result,/ペニシリン系をゼロから/);
+  const references=ui.list({lectures:all,categories:[],completed:{},filter:'reference'});
+  assert.match(references,/DNA→RNA→タンパク質を完全理解/);
+});
+
+test('all displayed lesson metadata is escaped and paragraphs render safely',()=>{
+  const app=launch();
+  const html=app.window.LectureUI.list({
+    lectures:[{id:'x" onclick="evil()',title:'<script>alert(1)</script>',subtitle:'',category:'basics',sections:[{title:'x',body:'text'}]}],
+    categories:[{id:'basics',name:'基礎'}],completed:{},filter:'all'
   });
-  assert.ok(!x.includes('<script>'));
-  assert.ok(!x.includes('id="x" onclick='));
-});
-
-test('script dependencies load in the correct order', () => {
-  const html = read('index.html');
-  const order = ['questions.js', 'lectures.js', 'foundation-roots.js', 'foundation-bridges-a.js', 'foundation-bridges-b.js', 'curriculum-init.js', 'lectures-ui.js', 'app.js'];
-  const offsets = order.map(s => html.indexOf('src="' + s + '"'));
-  assert.ok(offsets.every(x => x !== -1));
-  assert.ok(offsets.every((x, i) => i === 0 || x > offsets[i - 1]));
-});
-
-test('reader shows scannable chapter sections and mobile contents', () => {
-  const app = launch();
-  app.click({ route: 'lectures' });
-  assert.match(app.html, /reader-library-head/);
-  assert.match(app.html, /reader-search/);
-  assert.match(app.html, /reader-course-grid/);
-  app.click({ action: 'lecture-open', id: 'L07' });
-  assert.match(app.html, /reader-mobile-toc/);
-  assert.match(app.html, /reader-font-mobile/);
-  assert.match(app.html, /reader-goals/);
-  assert.match(app.html, /reader-reading-fill/);
-  assert.match(app.html, /まず押さえる/);
-  assert.ok((app.html.match(/class="reader-prose"/g) || []).length >= 5);
-  assert.match(app.html, /嫌気性菌/);
-});
-
-test('lecture reader search filters and escapes user-facing text', () => {
-  const app = launch();
-  const ui = app.window.LectureUI;
-  const lessons = app.window.INFECT_LECTURES;
-  const categories = [{ id: 'antibiotics', name: '抗菌薬' }];
-  const results = ui.list({ lectures: lessons, categories, completed: {}, filter: 'antibiotics', search: 'アミノグリコシド' });
-  assert.match(results, /アミノグリコシド/);
-  assert.match(results, /<strong id="lecture-match-count">[2-9][0-9]*<\/strong> 講義/); // Every matching lecture is searchable, including foundation headings
-  assert.ok(!results.includes('ペニシリン系をゼロから'));
-  const output = ui.detail({
-    lectures: [{ id: 'safe', title: '<img src=x onerror=alert(1)>', subtitle: '', category: 'antibiotics', sections: [{ title: '<b>unsafe</b>', body: 'first。second。third。' }] }],
-    categories, completed: {}, id: 'safe'
+  assert.ok(!html.includes('<script>'));
+  assert.ok(!html.includes('id="x" onclick='));
+  const output=app.window.LectureUI.detail({
+    lectures:[{id:'safe',title:'<img src=x onerror=alert(1)>',subtitle:'',category:'basics',sections:[{title:'<b>unsafe</b>',body:'first。second。third。'}]}],
+    categories:[],completed:{},id:'safe'
   });
   assert.ok(!output.includes('<img src=x'));
   assert.ok(!output.includes('<b>unsafe</b>'));
-  assert.match(output, /first/);
-  const paras = ui.paragraphs('背景。要点その1。要点その2。もうひとつ。');
-  assert.equal(paras.lead, '背景。');
-  assert.equal(paras.body.length, 2);
+  const paras=app.window.LectureUI.paragraphs('背景。要点その1。要点その2。もうひとつ。');
+  assert.equal(paras.lead,'背景。');
+  assert.equal(paras.body.length,2);
 });
 
-test('responsive reading theme and all scripts are linked', () => {
-  const index = read('index.html');
-  const css = read('reading-theme.css');
-  assert.match(index, /reading-theme.css/);
-  assert.match(css, /@media\(max-width:750px\)/);
-  assert.match(css, /\.reader-mobile-toc/);
-  assert.match(css, /\.reader-prose p/);
-  assert.match(css, /\.reader-font-mobile/);
-});
-
-test('first-principles explanations exist for every specialist lecture', () => {
-  const app = launch();
-  const lessons = app.window.INFECT_LECTURES;
-  const ids = new Set(lessons.map(l => l.id));
-  for (const l of lessons.filter(l => l.id.startsWith('L'))) {
-    assert.ok(l.prereqs.every(id => ids.has(id)), 'missing prerequisite for ' + l.id);
-    assert.match(l.sections[0].title, /ゼロから/);
-    assert.match(l.sections[1].title, /なぜ？/);
-    assert.ok(l.sections[0].body.length > 80, l.id + ' shallow foundation');
-    assert.equal(l.sections.length, l.originalSectionCount + 2);
-  }
-  assert.ok(lessons.find(l => l.id === 'F03').sections.some(s => s.body.includes('30S')));
-});
-
-test('students can jump back from antibiotic mechanism to its molecular prerequisites', () => {
-  const app = launch();
-  app.click({ route: 'lectures' });
-  assert.match(app.html, /基礎をつくる/);
-  app.click({ action: 'lecture-open', id: 'L07' });
-  assert.match(app.html, /BEFORE YOU START/);
-  assert.match(app.html, /data-id="F03"/);
-  assert.match(app.html, /膜・イオン・ATPのゼロ講義/);
-  app.click({ action: 'lecture-open', id: 'F03' });
-  assert.match(app.html, /DNA→RNA→タンパク質を完全理解/);
-  assert.match(app.html, /tRNA/);
-  assert.doesNotMatch(app.html, /この講義の確認テスト（0問）/);
+test('script dependencies and responsive reader styles load in correct order',()=>{
+  const index=read('index.html'),css=read('reading-theme.css');
+  const offsets=scripts.map(name=>index.indexOf('src="'+name+'"'));
+  assert.ok(offsets.every(x=>x!==-1));
+  assert.ok(offsets.every((x,i)=>i===0||x>offsets[i-1]));
+  assert.match(index,/reading-theme.css/);
+  assert.match(css,/\.drug-group-heading/);
+  assert.match(css,/@media\(max-width:750px\)/);
+  assert.match(css,/\.reader-mobile-toc/);
+  assert.match(css,/\.reader-prose p/);
+  assert.match(css,/\.reader-font-mobile/);
 });

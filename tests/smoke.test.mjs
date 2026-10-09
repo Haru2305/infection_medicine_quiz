@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 const read = file => fs.readFileSync(new URL('../' + file, import.meta.url), 'utf8');
-const scripts = ['questions.js', 'lectures.js', 'lectures-ui.js', 'app.js'];
+const scripts = ['questions.js','lectures.js','foundation-roots.js','foundation-bridges-a.js','foundation-bridges-b.js','curriculum-init.js','antibiotic-depth-a.js','antibiotic-depth-b.js','drug-antiviral.js','drug-antifungal.js','drug-antiparasitic.js','antibiotic-course.js','lectures-ui.js','app.js'];
 const windowData = {};
 vm.runInNewContext(read('questions.js'), { window: windowData }, { filename: 'questions.js' });
 vm.runInNewContext(read('lectures.js'), { window: windowData }, { filename: 'lectures.js' });
@@ -76,15 +76,14 @@ function boot(initialSaved = null) {
     querySelectorAll: () => [],
     addEventListener: (event, callback) => { events[event] = callback; }
   };
-  const window = { QUESTION_BANK: questions, INFECT_LECTURES: lectures, scrollTo: () => {} };
+  const window = { scrollTo: () => {} };
   const ctx = vm.createContext({
     window, document, localStorage,
     setTimeout: () => 1, clearTimeout: () => {},
     confirm: () => true,
     console
   });
-  vm.runInContext(read('lectures-ui.js'), ctx, { filename: 'lectures-ui.js' });
-  vm.runInContext(read('app.js'), ctx, { filename: 'app.js' });
+  for(const src of scripts)vm.runInContext(read(src), ctx, {filename:src});
   const click = data => events.click({
     target: { closest: () => ({ dataset: data }) },
     preventDefault: () => {}
@@ -95,9 +94,9 @@ function boot(initialSaved = null) {
 test('page boot + lecture navigation + reading record + targeted quiz works', () => {
   const saved = { records: { F001: { seen: 1, correct: 1, wrong: 0, lastCorrect: true } }, bookmarks: { F001: true } };
   const s = boot(saved);
-  assert.match(s.app.innerHTML, /感染症を/);
+  assert.match(s.app.innerHTML, /感染症の薬を/);
   s.click({ route: 'lectures' });
-  assert.match(s.app.innerHTML, /講義一覧/);
+  assert.match(s.app.innerHTML, /すべての薬/);
   assert.match(s.app.innerHTML, /アミノグリコシド系/);
   s.click({ action: 'lecture-open', id: 'L07' });
   assert.match(s.app.innerHTML, /嫌気性菌/);

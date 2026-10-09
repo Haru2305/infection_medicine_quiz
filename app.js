@@ -32,7 +32,7 @@ function progressFor(cat){const a=BANK.filter(q=>q.category===cat),n=a.filter(se
 function shuffled(a){const t=[...a];for(let i=t.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[t[i],t[j]]=[t[j],t[i]]}return t}
 function header(eyebrow,title,desc=''){return `<div class="eyebrow">${esc(eyebrow)}</div><h1 class="page-title">${esc(title)}</h1>${desc?`<p class="subhead">${esc(desc)}</p>`:''}`}
 function metric(label,value,desc,symbol){return `<div class="metric"><span class="metric-symbol">${symbol}</span><div class="metric-label">${label}</div><div class="metric-value">${value}</div><small>${desc}</small></div>`}
-function home(){let st=stat();return `<section class="hero"><div class="hero-content"><div class="eyebrow">YOUR INFECTION MEDICINE WORKSPACE</div><h1>感染症を、<br><span>「解ける知識」に。</span></h1><p>細菌・ウイルス・真菌・原虫・抗微生物薬。丸暗記じゃなく、分類と仕組みから体系的に。</p><button class="btn btn-primary" data-action="start" data-mode="beginner">基礎からスタート <span>→</span></button><button class="btn btn-ghost" data-route="lectures" style="margin-left:8px">本格講義を読む →</button></div></section>
+function home(){let st=stat();return `<section class="hero"><div class="hero-content"><div class="eyebrow">YOUR INFECTION MEDICINE WORKSPACE</div><h1>感染症の薬を、<br><span>「なぜ効く？」から。</span></h1><p>抗細菌薬・抗ウイルス薬・抗真菌薬・抗原虫薬・駆虫薬。分子のしくみから臨床の使い分けまで。</p><button class="btn btn-primary" data-action="start" data-mode="beginner">基礎からスタート <span>→</span></button><button class="btn btn-ghost" data-route="lectures" style="margin-left:8px">薬の系統別講義を読む →</button></div></section>
  <div class="stats-grid">${metric('問題数',BANK.length,'全8分野のオリジナル問題','▤')}${metric('学習済み',st.viewed,'一度でも解いた問題','◈')}${metric('累計正答率',st.rate+'%','全回答から計算','◎')}${metric('復習待ち',st.needs,'直近で間違えた問題','↺')}</div>
  <div class="section-head"><div><h2 class="section-title">分野別に学ぶ</h2><p class="subhead">気になる領域から選んでOK。初めてなら「感染症の基礎」へ。</p></div><button class="text-link" data-route="library">すべての問題 →</button></div><div class="cat-grid">${CATEGORIES.map(c=>{const x=progressFor(c.id);return `<button class="cat-card" data-action="category" data-cat="${c.id}"><div class="cat-top"><span class="cat-icon" style="--catbg:${c.bg};--catcol:${c.color}">${c.icon}</span><span class="cat-count">${x.all} QUESTIONS</span></div><div class="cat-name">${c.name}</div><div class="cat-desc">${c.desc}</div><div class="track"><span style="width:${x.pct}%"></span></div></button>`}).join('')}</div>
  <div class="quick-grid"><div class="panel"><span class="tag">QUICK PRACTICE</span><h3 style="margin-top:12px">10問チャレンジ</h3><p>全分野からランダムに10問。5分程度で知識をチェック。</p><div class="panel-actions"><button class="btn btn-primary btn-sm" data-action="start" data-mode="random10">ランダム10問 →</button><button class="btn btn-ghost btn-sm" data-action="start" data-mode="mistakes">復習だけ</button></div></div><div class="panel"><span class="tag alt">LEARN THE FRAMEWORK</span><h3 style="margin-top:12px">最初に理解したい整理表</h3><p>抗菌薬の標的、Gram染色、微生物の違いを1枚で整理。</p><button class="btn btn-ghost btn-sm" data-route="notes">まとめノートを見る →</button></div></div>`}
@@ -75,6 +75,9 @@ document.addEventListener('input',e=>{
   const match=(card.dataset.search||'').includes(term);
   card.hidden=!match;
   if(match)visible++;
+ });
+ document.querySelectorAll('.drug-group').forEach(group=>{
+   group.hidden=Array.from(group.querySelectorAll('.reader-course-tile')).every(card=>card.hidden);
  });
  const count=document.getElementById('lecture-match-count');
  if(count)count.textContent=String(visible);
