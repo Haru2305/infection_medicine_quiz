@@ -422,3 +422,14 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 .choice-help-content .inline-term-related-button{color:#e5eeee;border-color:#5c8186}
 .choice-help-content .inline-term-related-button:hover{background:#244454}
 @media(max-width:750px){.choice-help{margin-left:7px}.choice-help-toggle{font-size:12px;min-height:28px}}
+
+
+/* Paragraph integrity: no mid-word line breaks unless the word cannot fit.
+   Japanese punctuation follows browser line-breaking rules on mobile. */
+.reader-prose p,
+.reader-section h2 {
+  word-break: normal;
+  overflow-wrap: break-word;
+  line-break: strict;
+}
+.reader-prose p:last-child { margin-bottom: 0; }
