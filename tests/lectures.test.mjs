@@ -27,7 +27,7 @@ function launch() {
   const window = { scrollTo() {} };
   const localStorage = { getItem: key => storage.get(key) || null, setItem: (key,value) => storage.set(key,value) };
   const context = vm.createContext({ window, document, localStorage, setTimeout: () => 0, clearTimeout() {}, confirm: () => true, console });
-  for (const name of ['questions.js', 'lectures.js', 'lectures-ui.js', 'app.js']) {
+  for (const name of ['questions.js', 'lectures.js', 'foundation-roots.js', 'foundation-bridges-a.js', 'foundation-bridges-b.js', 'curriculum-init.js', 'lectures-ui.js', 'app.js']) {
     vm.runInContext(read(name), context, { filename: name });
   }
   return {
@@ -43,10 +43,13 @@ function launch() {
 test('deep lectures cover all eight infection disciplines', () => {
   const app = launch();
   const lessons = app.window.INFECT_LECTURES;
-  assert.equal(lessons.length, 39);
+  assert.equal(lessons.length, 52); // 39 existing specialist lessons + 13 new foundation modules
   assert.equal(new Set(lessons.map(l => l.category)).size, 8);
   assert.equal(new Set(lessons.map(l => l.id)).size, lessons.length);
-  assert.ok(lessons.every(l => l.sections.length >= 8));
+  assert.ok(lessons.every(l => l.sections.length >= 6));
+  assert.equal(lessons.filter(l => l.level === 'foundation').length, 13);
+  assert.equal(lessons.filter(l => l.level !== 'foundation').length, 39);
+  assert.ok(lessons.filter(l => l.id.startsWith('L')).every(l => l.sections.length >= 10 && l.prereqs.length >= 2));
   assert.ok(lessons.every(l => l.sections.every(s => s.title && s.body.length > 30)));
 });
 
@@ -83,7 +86,7 @@ test('lecture display escapes user-facing content', () => {
 
 test('script dependencies load in the correct order', () => {
   const html = read('index.html');
-  const order = ['questions.js', 'lectures.js', 'lectures-ui.js', 'app.js'];
+  const order = ['questions.js', 'lectures.js', 'foundation-roots.js', 'foundation-bridges-a.js', 'foundation-bridges-b.js', 'curriculum-init.js', 'lectures-ui.js', 'app.js'];
   const offsets = order.map(s => html.indexOf('src="' + s + '"'));
   assert.ok(offsets.every(x => x !== -1));
   assert.ok(offsets.every((x, i) => i === 0 || x > offsets[i - 1]));
@@ -112,7 +115,7 @@ test('lecture reader search filters and escapes user-facing text', () => {
   const categories = [{ id: 'antibiotics', name: '抗菌薬' }];
   const results = ui.list({ lectures: lessons, categories, completed: {}, filter: 'antibiotics', search: 'アミノグリコシド' });
   assert.match(results, /アミノグリコシド/);
-  assert.match(results, /2<\/strong> 講義/); // The tetracycline lecture also mentions aminoglycosides
+  assert.match(results, /<strong id="lecture-match-count">[2-9][0-9]*<\/strong> 講義/); // Every matching lecture is searchable, including foundation headings
   assert.ok(!results.includes('ペニシリン系をゼロから'));
   const output = ui.detail({
     lectures: [{ id: 'safe', title: '<img src=x onerror=alert(1)>', subtitle: '', category: 'antibiotics', sections: [{ title: '<b>unsafe</b>', body: 'first。second。third。' }] }],
@@ -134,4 +137,32 @@ test('responsive reading theme and all scripts are linked', () => {
   assert.match(css, /\.reader-mobile-toc/);
   assert.match(css, /\.reader-prose p/);
   assert.match(css, /\.reader-font-mobile/);
+});
+
+test('first-principles explanations exist for every specialist lecture', () => {
+  const app = launch();
+  const lessons = app.window.INFECT_LECTURES;
+  const ids = new Set(lessons.map(l => l.id));
+  for (const l of lessons.filter(l => l.id.startsWith('L'))) {
+    assert.ok(l.prereqs.every(id => ids.has(id)), 'missing prerequisite for ' + l.id);
+    assert.match(l.sections[0].title, /ゼロから/);
+    assert.match(l.sections[1].title, /なぜ？/);
+    assert.ok(l.sections[0].body.length > 80, l.id + ' shallow foundation');
+    assert.equal(l.sections.length, l.originalSectionCount + 2);
+  }
+  assert.ok(lessons.find(l => l.id === 'F03').sections.some(s => s.body.includes('30S')));
+});
+
+test('students can jump back from antibiotic mechanism to its molecular prerequisites', () => {
+  const app = launch();
+  app.click({ route: 'lectures' });
+  assert.match(app.html, /基礎をつくる/);
+  app.click({ action: 'lecture-open', id: 'L07' });
+  assert.match(app.html, /BEFORE YOU START/);
+  assert.match(app.html, /data-id="F03"/);
+  assert.match(app.html, /膜・イオン・ATPのゼロ講義/);
+  app.click({ action: 'lecture-open', id: 'F03' });
+  assert.match(app.html, /DNA→RNA→タンパク質を完全理解/);
+  assert.match(app.html, /tRNA/);
+  assert.doesNotMatch(app.html, /この講義の確認テスト（0問）/);
 });
