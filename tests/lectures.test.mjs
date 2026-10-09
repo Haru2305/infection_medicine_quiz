@@ -14,7 +14,7 @@ const scripts=[
   'drug-antiparasitic.js','antibiotic-course.js','non-drug-depth-a.js',
   'non-drug-depth-b.js','non-drug-course.js','non-drug-gaps.js',
   'question-concept-links.js','first-principles-concepts.js',
-  'in-lesson-concepts.js','inline-depth-placement.js','semantic-paragraphs.js','teaching-voice-editorial-a.js','teaching-voice-editorial-b.js','teaching-voice-editorial-c.js','teaching-voice-editorial-d.js','teaching-voice-editorial-e.js','teaching-voice-editorial-f.js','teaching-voice-editorial-g.js','teaching-voice-editorial-h.js','teaching-voice-editorial-i.js','inline-terms-base.js',
+  'in-lesson-concepts.js','inline-depth-placement.js','semantic-paragraphs.js','teaching-voice-editorial-a.js','teaching-voice-editorial-b.js','teaching-voice-editorial-c.js','teaching-voice-editorial-d.js','teaching-voice-editorial-e.js','teaching-voice-editorial-f.js','teaching-voice-editorial-g.js','teaching-voice-editorial-h.js','teaching-voice-editorial-i.js','teaching-voice-editorial-j.js','inline-terms-base.js',
   'inline-terms-mechanisms.js','inline-terms-clinical.js','inline-terms-clarify.js','inline-terms-pathogens.js','inline-terms-molecular-gaps.js','inline-terms.js',
   'lectures-ui.js','app.js'
 ];
@@ -474,9 +474,9 @@ test('authored ChatGPT-like medical explanations cover real paragraphs, not auto
  const edited=ls.filter(l=>targets.includes(l.id));
  assert.equal(edited.length,23);
  const rewritten=edited.flatMap(l=>l.sections.filter(s=>s.teachingVoiceEdited));
- assert.equal(app.window.INFECT_TEACHING_VOICE_STATS.sections,243);
+ assert.equal(app.window.INFECT_TEACHING_VOICE_STATS.sections,249);
  assert.equal(app.window.INFECT_TEACHING_VOICE_STATS.lessons,23);
- assert.equal(rewritten.length,243);
+ assert.equal(rewritten.length,249);
  for(const s of rewritten){
    assert.ok(s.body.length>=120,s.title+' not a complete explanation');
    assert.ok(s.body.includes('。'),s.title+' is not prose');
