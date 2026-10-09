@@ -100,7 +100,7 @@ test('page boot + lecture navigation + reading record + targeted quiz works', ()
   assert.match(s.app.innerHTML, /アミノグリコシド系/);
   s.click({ action: 'lecture-open', id: 'L07' });
   assert.match(s.app.innerHTML, /嫌気性菌/);
-  assert.match(s.app.innerHTML, /STEP 0 \\/ FIRST PRINCIPLES/);
+  assert.ok(s.app.innerHTML.includes('STEP 0 / FIRST PRINCIPLES'));
   assert.match(s.app.innerHTML, /30S・50S・翻訳をゼロから/);
   assert.match(s.app.innerHTML, /講義の確認テスト/);
   s.click({ action: 'lecture-mark', id: 'L07' });
