@@ -115,7 +115,7 @@ test('lecture reader search filters and escapes user-facing text', () => {
   const categories = [{ id: 'antibiotics', name: '抗菌薬' }];
   const results = ui.list({ lectures: lessons, categories, completed: {}, filter: 'antibiotics', search: 'アミノグリコシド' });
   assert.match(results, /アミノグリコシド/);
-  assert.match(results, /2<\/strong> 講義/); // The tetracycline lecture also mentions aminoglycosides
+  assert.match(results, /<strong id="lecture-match-count">[2-9][0-9]*<\/strong> 講義/); // Every matching lecture is searchable, including foundation headings
   assert.ok(!results.includes('ペニシリン系をゼロから'));
   const output = ui.detail({
     lectures: [{ id: 'safe', title: '<img src=x onerror=alert(1)>', subtitle: '', category: 'antibiotics', sections: [{ title: '<b>unsafe</b>', body: 'first。second。third。' }] }],
@@ -160,7 +160,7 @@ test('students can jump back from antibiotic mechanism to its molecular prerequi
   app.click({ action: 'lecture-open', id: 'L07' });
   assert.match(app.html, /BEFORE YOU START/);
   assert.match(app.html, /data-id="F03"/);
-  assert.match(app.html, /薬が細菌の中に入る/);
+  assert.match(app.html, /膜・イオン・ATPのゼロ講義/);
   app.click({ action: 'lecture-open', id: 'F03' });
   assert.match(app.html, /DNA→RNA→タンパク質を完全理解/);
   assert.match(app.html, /tRNA/);
