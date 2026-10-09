@@ -59,5 +59,19 @@ function render(value,{limit=6}={}){
   result+=escapeHtml(text.slice(offset));
   return result;
 }
-window.InlineTerms={render,card,get:id=>byId.get(id),list:()=>[...byId.values()]};
+function find(value,limit=2){
+  const text=String(value??'');
+  expression.lastIndex=0;
+  const matches=[],seen=new Set();
+  let m;
+  while((m=expression.exec(text))!==null&&matches.length<limit){
+    const literal=m[0],idx=m.index;
+    const latin=/^[A-Za-z0-9]+$/u.test(literal);
+    if(latin&&(/[A-Za-z0-9]/.test(text[idx-1]||'')||/[A-Za-z0-9]/.test(text[idx+literal.length]||'')))continue;
+    const c=options.get(literal.toLocaleLowerCase())?.entry;
+    if(c&&!seen.has(c.id)){seen.add(c.id);matches.push({id:c.id,title:c.title||literal,word:literal});}
+  }
+  return matches;
+}
+window.InlineTerms={render,card,find,get:id=>byId.get(id),list:()=>[...byId.values()]};
 })();
