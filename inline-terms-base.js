@@ -1,0 +1,7 @@
+/* Educational definitions appear within sentences, instead of an upfront STEP 0. */
+(()=>{
+'use strict';
+const aliases={"cell":["細胞"],"membrane":["細胞膜","脂質二重層"],"osmotic":["浸透圧","浸透"],"wall":["細胞壁","ペプチドグリカン","PBP"],"gram":["Gram染色","グラム染色","Gram陽性","Gram陰性","グラム陽性","グラム陰性"],"lps":["LPS","内毒素","エンドトキシン"],"dnarna":["DNA","RNA"],"ribosome":["リボソーム","30S","50S","70S"],"atp":["ATP","電子伝達系","膜電位"],"innate":["自然免疫","好中球","マクロファージ"],"tcell":["CD4","CD8","T細胞","MHC"],"antibody":["抗体","抗原","IgG","IgM","IgA"],"complement":["補体","C3b","C5a"],"cytokine":["サイトカイン","CRP","IL-6","TNF"],"airway":["肺胞","気管支","細気管支"],"gas":["PaO₂","SpO₂","酸素分圧","酸素含量"],"csf":["髄液","髄膜","血液脳関門"],"kidney":["糸球体","尿細管","腎盂","尿管"],"hemodynamics":["心拍出量","血管抵抗","組織灌流"],"coagulation":["DIC","血小板","フィブリン"],"test":["PCR","核酸増幅検査","培養","抗原検査"],"bayes":["感度","特異度","事前確率","偽陽性","偽陰性"],"virus":["ウイルス","エンベロープ","カプシド"],"fungus":["真菌","エルゴステロール","グルカン"],"parasite":["原虫","蠕虫","生活環"],"toxin":["破傷風毒素","ボツリヌス毒素","外毒素"],"vaccine":["ワクチン","受動免疫","能動免疫"],"pharm":["MIC","PK/PD","AUC"],"resistance":["耐性菌","βラクタマーゼ","排出ポンプ"],"endocardium":["疣贅","心内膜炎","心臓弁"],"pediatric":["TORCH","胎盤","先天感染"],"transmission":["接触感染","飛沫感染","空気感染"],"labs":["白血球数","白血球分画"]};
+const entries=window.INFECT_PRIMITIVE_CONCEPTS||[];
+window.INFECT_TERM_ENTRIES=entries.map(c=>({id:c.id,title:c.title,aliases:aliases[c.id],what:c.zero,normal:c.normal,why:c.abnormal,qb:c.qb,related:[]}));
+})();
