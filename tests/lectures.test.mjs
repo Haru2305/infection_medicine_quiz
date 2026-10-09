@@ -263,8 +263,11 @@ test('in-place explanations work for non-drug infections and for quiz choices an
     assert.match(view,/data-action="term-toggle"/);
     for(const term of words)assert.ok(view.includes(term),id+' missing '+term);
   }
+  const explainable=app.window.QUESTION_BANK.find(q=>[q.question,q.explanation,q.point,...q.reasons]
+    .some(str=>app.window.InlineTerms.render(str).includes('data-action="term-toggle"')));
+  assert.ok(explainable,'at least one quiz includes terms with inline explanations');
   app.click({route:'library'});
-  app.click({action:'start',mode:'random10'});
+  app.click({action:'single',id:explainable.id});
   app.click({action:'answer',index:'0'});
   assert.match(app.html,/CHECK POINT/);
   assert.match(app.html,/data-action="term-toggle"/);
